@@ -88,6 +88,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const metrics = await storage.getSalesMetrics();
       res.json(metrics);
     } catch (error) {
+      console.error("Error fetching sales metrics:", error);
       res.status(500).json({ message: "Failed to fetch sales metrics" });
     }
   });
@@ -97,6 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const charts = await storage.getSalesChart();
       res.json(charts);
     } catch (error) {
+      console.error("Error fetching sales charts:", error);
       res.status(500).json({ message: "Failed to fetch chart data" });
     }
   });
