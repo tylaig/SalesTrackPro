@@ -161,8 +161,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Support tickets routes
   app.get("/api/support/tickets", async (req, res) => {
     try {
-      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
-      const tickets = await storage.getSupportTickets(userId);
+      const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
+      const tickets = await storage.getSupportTickets(clientId);
       res.json(tickets);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch support tickets" });

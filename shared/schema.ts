@@ -30,7 +30,7 @@ export const sales = pgTable("sales", {
 
 export const supportTickets = pgTable("support_tickets", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  clientId: integer("client_id").references(() => clients.id).notNull(),
   subject: varchar("subject", { length: 255 }).notNull(),
   description: text("description").notNull(),
   priority: varchar("priority", { length: 20 }).notNull(), // 'low', 'medium', 'high', 'urgent'
@@ -42,6 +42,7 @@ export const supportTickets = pgTable("support_tickets", {
 // Relations
 export const clientsRelations = relations(clients, ({ many }) => ({
   sales: many(sales),
+  supportTickets: many(supportTickets),
 }));
 
 export const salesRelations = relations(sales, ({ one }) => ({
@@ -52,13 +53,13 @@ export const salesRelations = relations(sales, ({ one }) => ({
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
-  supportTickets: many(supportTickets),
+  // users don't have direct tickets anymore
 }));
 
 export const supportTicketsRelations = relations(supportTickets, ({ one }) => ({
-  user: one(users, {
-    fields: [supportTickets.userId],
-    references: [users.id],
+  client: one(clients, {
+    fields: [supportTickets.clientId],
+    references: [clients.id],
   }),
 }));
 
@@ -101,6 +102,6 @@ export type SaleWithClient = Sale & {
   client: Client;
 };
 
-export type SupportTicketWithUser = SupportTicket & {
-  user: User;
+export type SupportTicketWithClient = SupportTicket & {
+  client: Client;
 };

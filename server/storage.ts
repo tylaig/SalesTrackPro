@@ -3,7 +3,7 @@ import {
   type User, type InsertUser,
   type Client, type InsertClient,
   type Sale, type InsertSale, type SaleWithClient,
-  type SupportTicket, type InsertSupportTicket, type SupportTicketWithUser
+  type SupportTicket, type InsertSupportTicket, type SupportTicketWithClient
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, count, sql } from "drizzle-orm";
@@ -39,8 +39,8 @@ export interface IStorage {
   }>;
 
   // Support Tickets
-  getSupportTickets(userId?: number): Promise<SupportTicketWithUser[]>;
-  getSupportTicket(id: number): Promise<SupportTicketWithUser | undefined>;
+  getSupportTickets(clientId?: number): Promise<SupportTicketWithClient[]>;
+  getSupportTicket(id: number): Promise<SupportTicketWithClient | undefined>;
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
   updateSupportTicket(id: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined>;
   deleteSupportTicket(id: number): Promise<boolean>;
@@ -95,7 +95,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteClient(id: number): Promise<boolean> {
     const result = await db.delete(clients).where(eq(clients.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Sales
@@ -149,7 +149,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSale(id: number): Promise<boolean> {
     const result = await db.delete(sales).where(eq(sales.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getSalesMetrics(): Promise<{
@@ -223,7 +223,10 @@ export class DatabaseStorage implements IStorage {
     monthlyData.forEach(row => {
       const monthIndex = months.findIndex(m => m === row.month);
       if (monthIndex !== -1) {
-        monthly[monthIndex][row.status as keyof typeof monthly[0]] = Number(row.value);
+        const status = row.status as 'realized' | 'recovered' | 'lost';
+        if (status in monthly[monthIndex]) {
+          monthly[monthIndex][status] = Number(row.value);
+        }
       }
     });
 
@@ -237,28 +240,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Support Tickets
-  async getSupportTickets(userId?: number): Promise<SupportTicketWithUser[]> {
+  async getSupportTickets(clientId?: number): Promise<SupportTicketWithClient[]> {
     const query = db
       .select()
       .from(supportTickets)
-      .innerJoin(users, eq(supportTickets.userId, users.id))
+      .innerJoin(clients, eq(supportTickets.clientId, clients.id))
       .orderBy(desc(supportTickets.createdAt));
 
-    const result = userId 
-      ? await query.where(eq(supportTickets.userId, userId))
+    const result = clientId 
+      ? await query.where(eq(supportTickets.clientId, clientId))
       : await query;
 
     return result.map(row => ({
       ...row.support_tickets,
-      user: row.users
+      client: row.clients
     }));
   }
 
-  async getSupportTicket(id: number): Promise<SupportTicketWithUser | undefined> {
+  async getSupportTicket(id: number): Promise<SupportTicketWithClient | undefined> {
     const result = await db
       .select()
       .from(supportTickets)
-      .innerJoin(users, eq(supportTickets.userId, users.id))
+      .innerJoin(clients, eq(supportTickets.clientId, clients.id))
       .where(eq(supportTickets.id, id));
 
     if (result.length === 0) return undefined;
@@ -266,7 +269,7 @@ export class DatabaseStorage implements IStorage {
     const row = result[0];
     return {
       ...row.support_tickets,
-      user: row.users
+      client: row.clients
     };
   }
 
@@ -289,7 +292,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSupportTicket(id: number): Promise<boolean> {
     const result = await db.delete(supportTickets).where(eq(supportTickets.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
 

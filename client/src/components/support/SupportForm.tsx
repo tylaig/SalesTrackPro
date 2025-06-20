@@ -13,8 +13,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Headphones, Send } from "lucide-react";
 import { z } from "zod";
 
-const formSchema = insertSupportTicketSchema.extend({
-  userId: z.number().default(1) // Mock user ID for now
+const formSchema = z.object({
+  clientId: z.number(),
+  subject: z.string().min(1, "Assunto é obrigatório"),
+  description: z.string().min(1, "Descrição é obrigatória"),
+  priority: z.enum(["low", "medium", "high"]),
+  status: z.enum(["open", "in_progress", "resolved", "closed"]),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -30,7 +34,7 @@ export default function SupportForm() {
       description: "",
       priority: "medium",
       status: "open",
-      userId: 1
+      clientId: 1
     },
   });
 

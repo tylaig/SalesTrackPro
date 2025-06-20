@@ -188,7 +188,7 @@ export default function Sales() {
                           {formatDate(sale.date)}
                         </TableCell>
                         <TableCell className="text-gray-500 max-w-xs truncate">
-                          {sale.description || "—"}
+                          {sale.product || "—"}
                         </TableCell>
                       </TableRow>
                     ))

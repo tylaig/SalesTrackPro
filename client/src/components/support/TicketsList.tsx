@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
-import type { SupportTicketWithUser } from "@shared/schema";
+import type { SupportTicketWithClient } from "@shared/schema";
 
 export default function TicketsList() {
-  const { data: tickets = [], isLoading } = useQuery<SupportTicketWithUser[]>({
+  const { data: tickets = [], isLoading } = useQuery<SupportTicketWithClient[]>({
     queryKey: ["/api/support/tickets"],
   });
 
