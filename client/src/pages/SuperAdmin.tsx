@@ -37,10 +37,10 @@ export default function SuperAdmin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="super-admin-layout w-full min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
+      <header className="w-full bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+        <div className="w-full flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Shield className="text-red-600 h-8 w-8" />
             <div>
@@ -57,7 +57,7 @@ export default function SuperAdmin() {
       </header>
 
       {/* Content */}
-      <div className="p-6 min-h-[calc(100vh-120px)]">
+      <div className="super-admin-content w-full p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
@@ -163,7 +163,7 @@ export default function SuperAdmin() {
             </div>
 
             {/* Webhooks Status */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
               <Card className="shadow-sm border border-gray-100">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">

@@ -20,9 +20,9 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex min-h-screen bg-background">
       <Sidebar onLogout={onLogout} />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 w-full min-h-screen">
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/dashboard" component={Dashboard} />
