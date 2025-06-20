@@ -14,6 +14,31 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Sales metrics and charts FIRST - before parameterized routes
+  app.get("/api/sales/metrics", async (req, res) => {
+    try {
+      console.log("Fetching sales metrics from database...");
+      const metrics = await storage.getSalesMetrics();
+      console.log("Sales metrics fetched:", metrics);
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching sales metrics:", error);
+      res.status(500).json({ message: "Failed to fetch sales metrics", error: error.message });
+    }
+  });
+
+  app.get("/api/sales/charts", async (req, res) => {
+    try {
+      console.log("Fetching sales charts from database...");
+      const charts = await storage.getSalesChart();
+      console.log("Sales charts fetched:", charts);
+      res.json(charts);
+    } catch (error) {
+      console.error("Error fetching sales charts:", error);
+      res.status(500).json({ message: "Failed to fetch chart data", error: error.message });
+    }
+  });
+
   // Sales routes
   app.get("/api/sales", async (req, res) => {
     try {
@@ -82,26 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sales metrics and charts
-  app.get("/api/sales/metrics", async (req, res) => {
-    try {
-      const metrics = await storage.getSalesMetrics();
-      res.json(metrics);
-    } catch (error) {
-      console.error("Error fetching sales metrics:", error);
-      res.status(500).json({ message: "Failed to fetch sales metrics" });
-    }
-  });
 
-  app.get("/api/sales/charts", async (req, res) => {
-    try {
-      const charts = await storage.getSalesChart();
-      res.json(charts);
-    } catch (error) {
-      console.error("Error fetching sales charts:", error);
-      res.status(500).json({ message: "Failed to fetch chart data" });
-    }
-  });
 
   // Clients routes
   app.get("/api/clients", async (req, res) => {
