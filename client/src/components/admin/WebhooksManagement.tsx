@@ -286,7 +286,7 @@ export default function WebhooksManagement() {
                   <div className="flex flex-wrap gap-1">
                     {(webhook.events && webhook.events.length > 0 ? webhook.events : []).map((event: any, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">
-                        {event}
+                        {typeof event === 'string' ? event : event.eventType || 'Unknown'}
                       </Badge>
                     ))}
                   </div>
