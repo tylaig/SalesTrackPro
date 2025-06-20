@@ -31,12 +31,29 @@ interface SalesTrendChartProps {
 }
 
 export default function SalesTrendChart({ data }: SalesTrendChartProps) {
+  const monthlyData = data?.monthly || [];
+  
+  if (!monthlyData || monthlyData.length === 0) {
+    return (
+      <Card className="shadow-sm border border-gray-100">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-800">Tendência de Vendas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            Nenhum dado disponível
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   const chartData = {
-    labels: data.monthly.map(item => item.month),
+    labels: monthlyData.map(item => item.month),
     datasets: [
       {
         label: 'Vendas Realizadas',
-        data: data.monthly.map(item => item.realized),
+        data: monthlyData.map(item => item.realized),
         borderColor: 'hsl(120, 100%, 40%)',
         backgroundColor: 'hsla(120, 100%, 40%, 0.1)',
         tension: 0.4,
@@ -44,7 +61,7 @@ export default function SalesTrendChart({ data }: SalesTrendChartProps) {
       },
       {
         label: 'Vendas Recuperadas',
-        data: data.monthly.map(item => item.recovered),
+        data: monthlyData.map(item => item.recovered),
         borderColor: 'hsl(207, 90%, 54%)',
         backgroundColor: 'hsla(207, 90%, 54%, 0.1)',
         tension: 0.4,
@@ -52,7 +69,7 @@ export default function SalesTrendChart({ data }: SalesTrendChartProps) {
       },
       {
         label: 'Vendas Perdidas',
-        data: data.monthly.map(item => item.lost),
+        data: monthlyData.map(item => item.lost),
         borderColor: 'hsl(0, 84.2%, 60.2%)',
         backgroundColor: 'hsla(0, 84.2%, 60.2%, 0.1)',
         tension: 0.4,

@@ -16,6 +16,23 @@ interface SalesDistributionChartProps {
 }
 
 export default function SalesDistributionChart({ data }: SalesDistributionChartProps) {
+  const distributionData = data?.distribution || [];
+  
+  if (!distributionData || distributionData.length === 0) {
+    return (
+      <Card className="shadow-sm border border-gray-100">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-800">Distribuição de Vendas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            Nenhum dado disponível
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   const statusLabels: Record<string, string> = {
     realized: 'Realizadas',
     recovered: 'Recuperadas',
@@ -29,11 +46,11 @@ export default function SalesDistributionChart({ data }: SalesDistributionChartP
   };
 
   const chartData = {
-    labels: data.distribution.map(item => statusLabels[item.status] || item.status),
+    labels: distributionData.map(item => statusLabels[item.status] || item.status),
     datasets: [
       {
-        data: data.distribution.map(item => item.value),
-        backgroundColor: data.distribution.map(item => statusColors[item.status] || '#6B7280'),
+        data: distributionData.map(item => item.value),
+        backgroundColor: distributionData.map(item => statusColors[item.status] || '#6B7280'),
         borderWidth: 0,
       },
     ],
@@ -57,7 +74,7 @@ export default function SalesDistributionChart({ data }: SalesDistributionChartP
             Distribuição de Vendas
           </CardTitle>
           <div className="flex items-center space-x-4 text-sm">
-            {data.distribution.map((item) => (
+            {distributionData.map((item) => (
               <div key={item.status} className="flex items-center">
                 <div 
                   className="w-3 h-3 rounded-full mr-2"

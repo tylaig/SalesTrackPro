@@ -109,8 +109,8 @@ export default function Dashboard() {
             </>
           ) : chartData ? (
             <>
-              <SalesTrendChart data={chartData.monthly || []} />
-              <SalesDistributionChart data={chartData.distribution || []} />
+              <SalesTrendChart data={chartData} />
+              <SalesDistributionChart data={chartData} />
             </>
           ) : (
             <div className="col-span-2 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
