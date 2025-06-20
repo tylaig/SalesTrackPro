@@ -9,6 +9,7 @@ import Sales from "@/pages/Sales";
 import Clients from "@/pages/Clients";
 import Support from "@/pages/Support";
 import Reports from "@/pages/Reports";
+import SuperAdmin from "@/pages/SuperAdmin";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/navigation/Sidebar";
@@ -29,6 +30,7 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
           <Route path="/clients" component={Clients} />
           <Route path="/support" component={Support} />
           <Route path="/reports" component={Reports} />
+          <Route path="/super-admin" component={SuperAdmin} />
           <Route component={NotFound} />
         </Switch>
       </main>
