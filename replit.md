@@ -109,13 +109,13 @@ The application follows a monorepo pattern with shared types and schemas:
 
 ## Recent Updates
 
-### Database Integration and Metrics Fix (June 20, 2025)
-- Resolved route conflicts causing "Failed to fetch sale by ID" errors in metrics endpoints
-- Corrected Express route ordering to prioritize specific endpoints over parameterized routes
-- Connected all dashboard metrics to real PostgreSQL data (10 sales records, 5 clients)
-- Implemented proper error handling and logging for database operations
-- Fixed chart data display to show actual sales distribution by status
-- Real data now shows: 6 realized (R$ 70,900), 2 recovered (R$ 28,500), 2 lost (R$ 19,800)
+### Data Cleanup and Support System Redesign (June 20, 2025)
+- Removed all support ticket creation forms (clients submit externally, not through internal system)
+- Cleaned all mock data from PostgreSQL database (sales, clients, support_tickets tables)
+- Updated Support page to show only incoming tickets from clients
+- Enhanced Dashboard with proper empty state handling when no real data exists
+- Added informative empty states for charts, KPIs, and tables
+- Dashboard now only shows metrics when actual data exists (no more mock values)
 
 ### Super Admin System Implementation (June 20, 2025)
 - Implemented comprehensive Super Admin dashboard with advanced capabilities

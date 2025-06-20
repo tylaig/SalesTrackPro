@@ -79,7 +79,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        ) : metrics ? (
+        ) : metrics && (metrics.totalSales > 0 || metrics.totalClients > 0) ? (
           <KPICards metrics={{
             totalSales: metrics.totalSales || 0,
             recoveredSales: metrics.recoveredSales || 0,
@@ -91,8 +91,12 @@ export default function Dashboard() {
             clientGrowth: 15.6
           }} />
         ) : (
-          <div className="mb-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800">Não foi possível carregar as métricas de vendas.</p>
+          <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="text-blue-800 font-medium mb-2">Dashboard Vazio</h3>
+            <p className="text-blue-700">
+              Nenhuma venda foi registrada ainda. Quando houver dados de vendas e clientes, 
+              as métricas aparecerão aqui automaticamente.
+            </p>
           </div>
         )}
 
@@ -107,14 +111,24 @@ export default function Dashboard() {
                 <div className="h-64 bg-gray-200 rounded"></div>
               </div>
             </>
-          ) : chartData ? (
+          ) : chartData && chartData.distribution && chartData.distribution.length > 0 ? (
             <>
               <SalesTrendChart data={chartData} />
               <SalesDistributionChart data={chartData} />
             </>
           ) : (
-            <div className="col-span-2 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-yellow-800">Não foi possível carregar os dados dos gráficos.</p>
+            <div className="col-span-2 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="text-center">
+                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Gráficos não disponíveis</h3>
+                <p className="text-gray-500">
+                  Os gráficos aparecerão quando houver dados de vendas suficientes.
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -124,8 +138,22 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 animate-pulse mb-8">
             <div className="h-64 bg-gray-200 rounded"></div>
           </div>
-        ) : (
+        ) : sales && sales.length > 0 ? (
           <SalesTable sales={sales} />
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="text-center py-8">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma venda registrada</h3>
+              <p className="text-gray-500">
+                Quando houver vendas registradas no sistema, elas aparecerão aqui.
+              </p>
+            </div>
+          </div>
         )}
 
         {/* Support Section */}
