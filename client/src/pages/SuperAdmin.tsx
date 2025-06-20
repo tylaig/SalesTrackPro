@@ -97,7 +97,9 @@ export default function SuperAdmin() {
                       <p className="text-2xl font-semibold text-gray-800">
                         {(metrics as any)?.totalUsers || 0}
                       </p>
-                      <p className="text-xs text-blue-600 mt-1">+5 novos esta semana</p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        {((metrics as any)?.totalUsers > 0) ? '+2 novos esta semana' : 'Nenhum usuário novo'}
+                      </p>
                     </div>
                     <div className="p-3 rounded-lg bg-blue-100">
                       <Users className="text-blue-600 h-6 w-6" />
@@ -114,7 +116,9 @@ export default function SuperAdmin() {
                       <p className="text-2xl font-semibold text-gray-800">
                         {(metrics as any)?.totalPlans || 0}
                       </p>
-                      <p className="text-xs text-green-600 mt-1">2 novos planos</p>
+                      <p className="text-xs text-green-600 mt-1">
+                        {((metrics as any)?.totalPlans > 0) ? `${(metrics as any)?.totalPlans} planos disponíveis` : 'Nenhum plano ativo'}
+                      </p>
                     </div>
                     <div className="p-3 rounded-lg bg-green-100">
                       <CreditCard className="text-green-600 h-6 w-6" />
@@ -209,23 +213,31 @@ export default function SuperAdmin() {
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center space-x-3">
                       <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                      <span className="text-gray-600">Novo usuário registrado</span>
-                      <span className="text-xs text-gray-400 ml-auto">2h atrás</span>
+                      <span className="text-gray-600">
+                        {((metrics as any)?.totalUsers > 0) ? 'Usuários ativos no sistema' : 'Sistema aguardando usuários'}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-auto">agora</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-gray-600">Webhook disparado</span>
-                      <span className="text-xs text-gray-400 ml-auto">4h atrás</span>
+                      <span className="text-gray-600">
+                        {((metrics as any)?.totalWebhooks > 0) ? 'Webhooks configurados' : 'Nenhum webhook ativo'}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-auto">agora</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="h-2 w-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-gray-600">Chip em recuperação</span>
-                      <span className="text-xs text-gray-400 ml-auto">6h atrás</span>
+                      <span className="text-gray-600">
+                        {((metrics as any)?.recoveryChips > 0) ? `${(metrics as any)?.recoveryChips} chips em recuperação` : 'Nenhum chip em recuperação'}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-auto">agora</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="h-2 w-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-gray-600">Novo plano criado</span>
-                      <span className="text-xs text-gray-400 ml-auto">1d atrás</span>
+                      <span className="text-gray-600">
+                        {((metrics as any)?.totalPlans > 0) ? `${(metrics as any)?.totalPlans} planos disponíveis` : 'Nenhum plano configurado'}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-auto">agora</span>
                     </div>
                   </div>
                 </CardContent>
