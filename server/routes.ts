@@ -35,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(sale);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch sales data" });
+      res.status(500).json({ message: "Failed to fetch sale by ID" });
     }
   });
 
@@ -85,12 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sales metrics and charts
   app.get("/api/sales/metrics", async (req, res) => {
     try {
-      const metrics = {
-        totalSales: 70900,
-        recoveredSales: 28500,
-        lostSales: 19800,
-        totalClients: 5
-      };
+      const metrics = await storage.getSalesMetrics();
       res.json(metrics);
     } catch (error) {
       console.error("Error fetching sales metrics:", error);
@@ -100,21 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/sales/charts", async (req, res) => {
     try {
-      const charts = {
-        monthly: [
-          { month: 'Jan', realized: 1, recovered: 0, lost: 0 },
-          { month: 'Feb', realized: 1, recovered: 1, lost: 0 },
-          { month: 'Mar', realized: 1, recovered: 0, lost: 1 },
-          { month: 'Apr', realized: 1, recovered: 1, lost: 0 },
-          { month: 'May', realized: 1, recovered: 0, lost: 1 },
-          { month: 'Jun', realized: 1, recovered: 0, lost: 0 }
-        ],
-        distribution: [
-          { status: 'realized', count: 6, value: 70900 },
-          { status: 'recovered', count: 2, value: 28500 },
-          { status: 'lost', count: 2, value: 19800 }
-        ]
-      };
+      const charts = await storage.getSalesChart();
       res.json(charts);
     } catch (error) {
       console.error("Error fetching sales charts:", error);
