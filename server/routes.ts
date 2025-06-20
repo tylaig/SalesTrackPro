@@ -423,52 +423,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payload = req.body;
       console.log("Webhook received:", payload);
 
-      switch (payload.event_type) {
-        case 'sale_created':
-        case 'sale_completed':
-          // Check if client exists, create if not
-          let client;
-          const existingClient = await storage.getClients().then(clients => 
-            clients.find(c => c.email === payload.client.email)
-          );
-          
-          if (!existingClient) {
-            client = await storage.createClient({
-              name: payload.client.name,
-              email: payload.client.email,
-              phone: payload.client.phone || '',
-              company: payload.client.company || ''
-            });
-          } else {
-            client = existingClient;
-          }
+      // Normalize phone number (remove spaces, parentheses, dashes)
+      const normalizePhone = (phone: string) => {
+        return phone.replace(/[\s\(\)\-]/g, '');
+      };
 
-          // Create sale
+      const clientPhone = normalizePhone(payload.client.phone);
+
+      // Find client by phone (unique identifier)
+      let client = await storage.getClients().then(clients => 
+        clients.find(c => normalizePhone(c.phone) === clientPhone)
+      );
+
+      // Create client if doesn't exist
+      if (!client) {
+        client = await storage.createClient({
+          name: payload.client.name,
+          email: payload.client.email || '',
+          phone: payload.client.phone,
+          company: payload.client.company || ''
+        });
+      }
+
+      switch (payload.event_type) {
+        case 'payment_pending':
+          // Create pending sale
           await storage.createSale({
             clientId: client.id,
             product: payload.product,
             value: payload.value,
-            status: payload.status === 'completed' ? 'realized' : payload.status,
+            status: 'pending',
             date: new Date(payload.timestamp),
-            notes: payload.notes || ''
+            notes: `${payload.payment_method} - ${payload.transaction_id}`
           });
           break;
 
-        case 'client_created':
-        case 'client_updated':
-          // Create or update client
-          const existingClientByEmail = await storage.getClients().then(clients => 
-            clients.find(c => c.email === payload.client.email)
+        case 'payment_completed':
+          // Find pending sale and update to realized
+          const sales = await storage.getSales();
+          const pendingSale = sales.find(s => 
+            s.clientId === client.id && 
+            s.status === 'pending' &&
+            s.notes?.includes(payload.transaction_id)
           );
-          
-          if (!existingClientByEmail) {
-            await storage.createClient({
-              name: payload.client.name,
-              email: payload.client.email,
-              phone: payload.client.phone || '',
-              company: payload.client.company || ''
+
+          if (pendingSale) {
+            await storage.updateSale(pendingSale.id, {
+              status: 'realized',
+              notes: `${pendingSale.notes} - Pago em ${new Date(payload.timestamp).toLocaleString()}`
+            });
+          } else {
+            // Create new realized sale if no pending found
+            await storage.createSale({
+              clientId: client.id,
+              product: payload.product,
+              value: payload.value,
+              status: 'realized',
+              date: new Date(payload.timestamp),
+              notes: `${payload.payment_method} - ${payload.transaction_id} - Direto`
             });
           }
+          break;
+
+        case 'payment_failed':
+          // Find pending sale and update to lost
+          const allSales = await storage.getSales();
+          const expiredSale = allSales.find(s => 
+            s.clientId === client.id && 
+            s.status === 'pending' &&
+            s.notes?.includes(payload.transaction_id)
+          );
+
+          if (expiredSale) {
+            await storage.updateSale(expiredSale.id, {
+              status: 'lost',
+              notes: `${expiredSale.notes} - Expirado/Falhado em ${new Date(payload.timestamp).toLocaleString()}`
+            });
+          }
+          break;
+
+        case 'recovery_purchase':
+          // Check if client has any lost sales
+          const clientSales = await storage.getSales();
+          const hasLostSales = clientSales.some(s => 
+            s.clientId === client.id && s.status === 'lost'
+          );
+
+          const status = hasLostSales ? 'recovered' : 'realized';
+          
+          await storage.createSale({
+            clientId: client.id,
+            product: payload.product,
+            value: payload.value,
+            status: status,
+            date: new Date(payload.timestamp),
+            notes: `${payload.payment_method} - ${payload.transaction_id} - ${status === 'recovered' ? 'Recuperação' : 'Nova'}`
+          });
           break;
       }
 

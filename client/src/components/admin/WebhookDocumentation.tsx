@@ -16,49 +16,68 @@ export default function WebhookDocumentation() {
   };
 
   const payloadExamples = {
-    sale_created: {
-      event_type: "sale_created",
-      sale_id: "sale_123456789",
+    payment_pending: {
+      event_type: "payment_pending",
+      transaction_id: "pix_123456789",
       client: {
         name: "João Silva",
         email: "joao@empresa.com",
-        phone: "(11) 99999-1111",
+        phone: "11999991111",
         company: "Tech Solutions"
       },
       product: "Software de Gestão",
-      value: 25000.00,
-      status: "pending",
+      value: 25.00,
+      payment_method: "pix",
       created_at: "2025-06-20T22:30:00Z",
       timestamp: "2025-06-20T22:30:00Z",
-      notes: "Proposta enviada ao cliente"
+      expires_at: "2025-06-22T22:30:00Z"
     },
-    sale_completed: {
-      event_type: "sale_completed",
-      sale_id: "sale_123456789",
+    payment_completed: {
+      event_type: "payment_completed",
+      transaction_id: "pix_123456789",
       client: {
         name: "João Silva", 
         email: "joao@empresa.com",
-        phone: "(11) 99999-1111",
+        phone: "11999991111",
         company: "Tech Solutions"
       },
       product: "Software de Gestão",
-      value: 25000.00,
-      status: "realized",
-      completed_at: "2025-06-20T22:35:00Z",
-      timestamp: "2025-06-20T22:35:00Z",
-      notes: "Venda finalizada com sucesso"
+      value: 25.00,
+      payment_method: "pix",
+      completed_at: "2025-06-20T23:00:00Z",
+      timestamp: "2025-06-20T23:00:00Z"
     },
-    client_created: {
-      event_type: "client_created",
+    payment_failed: {
+      event_type: "payment_failed",
+      transaction_id: "pix_123456789",
       client: {
-        name: "Maria Santos",
-        email: "maria@startup.com", 
-        phone: "(11) 99999-2222",
-        company: "StartupX"
+        name: "João Silva",
+        email: "joao@empresa.com",
+        phone: "11999991111",
+        company: "Tech Solutions"
       },
-      created_at: "2025-06-20T22:30:00Z",
-      timestamp: "2025-06-20T22:30:00Z",
-      source: "website_form"
+      product: "Software de Gestão",
+      value: 25.00,
+      payment_method: "pix",
+      failed_at: "2025-06-22T22:30:00Z",
+      timestamp: "2025-06-22T22:30:00Z",
+      reason: "expired"
+    },
+    recovery_purchase: {
+      event_type: "recovery_purchase",
+      transaction_id: "card_987654321",
+      client: {
+        name: "João Silva",
+        email: "joao@empresa.com",
+        phone: "11999991111",
+        company: "Tech Solutions"
+      },
+      product: "Software de Gestão Premium",
+      value: 50.00,
+      payment_method: "credit_card",
+      completed_at: "2025-06-25T10:15:00Z",
+      timestamp: "2025-06-25T10:15:00Z",
+      original_transaction: "pix_123456789"
     }
   };
 
@@ -75,8 +94,9 @@ export default function WebhookDocumentation() {
           <div>
             <h3 className="font-semibold mb-2">Como usar os webhooks</h3>
             <p className="text-sm text-gray-600 mb-4">
-              Configure os URLs dos webhooks no sistema para receber notificações automáticas 
-              sobre eventos de pagamento. O sistema enviará requisições POST com os payloads abaixo.
+              Sistema receptor de webhooks para processar vendas automaticamente. 
+              Identifica clientes pelo telefone e gerencia status: realizadas, perdidas e recuperadas.
+              Após 48h sem pagamento, marca como perdida. Se mesmo telefone comprar depois, marca como recuperada.
             </p>
           </div>
 
@@ -93,11 +113,10 @@ export default function WebhookDocumentation() {
             <div>
               <h4 className="font-medium mb-2">Eventos Suportados</h4>
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="outline">sale_created</Badge>
-                <Badge variant="outline">sale_completed</Badge>
-                <Badge variant="outline">sale_cancelled</Badge>
-                <Badge variant="outline">client_created</Badge>
-                <Badge variant="outline">client_updated</Badge>
+                <Badge variant="outline">payment_pending</Badge>
+                <Badge variant="outline">payment_completed</Badge>
+                <Badge variant="outline">payment_failed</Badge>
+                <Badge variant="outline">recovery_purchase</Badge>
               </div>
             </div>
           </div>
@@ -136,43 +155,27 @@ export default function WebhookDocumentation() {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <h4 className="font-medium mb-2">Exemplo de Endpoint (Node.js/Express)</h4>
+              <h4 className="font-medium mb-2">Lógica de Processamento</h4>
               <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{`app.post('/webhook/sales', (req, res) => {
-  const payload = req.body;
-  
-  // Verificar assinatura (recomendado)
-  const signature = req.headers['x-webhook-signature'];
-  
-  // Processar evento
-  switch (payload.event_type) {
-    case 'sale_created':
-      console.log('Nova venda criada:', payload);
-      // Registrar venda no sistema
-      break;
-    case 'sale_completed':
-      console.log('Venda finalizada:', payload);
-      // Atualizar status da venda
-      break;
-    case 'client_created':
-      console.log('Novo cliente:', payload);
-      // Adicionar cliente ao banco
-      break;
-  }
-  
-  // Responder com 200 para confirmar recebimento
-  res.status(200).json({ received: true });
-});`}</code>
+                <code>{`// payment_pending: Cria venda com status "pending"
+// payment_completed: Atualiza para "realized" 
+// payment_failed: Marca como "lost" após 48h
+// recovery_purchase: Cliente com telefone existente
+//   que tinha venda perdida volta a comprar = "recovered"
+
+// Endpoint: POST /api/webhook/sales
+// Identificação: client.phone (único)
+// Auto-criação de clientes se não existirem
+// Auto-atualização de status baseado no telefone`}</code>
               </pre>
             </div>
 
             <div>
               <h4 className="font-medium mb-2">Teste com cURL</h4>
               <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{`curl -X POST https://seu-site.com/webhook/sales \\
+                <code>{`curl -X POST http://localhost:5000/api/webhook/sales \\
   -H "Content-Type: application/json" \\
-  -H "User-Agent: WebhookSystem/1.0" \\
-  -d '${JSON.stringify(payloadExamples.sale_completed, null, 2)}'`}</code>
+  -d '${JSON.stringify(payloadExamples.payment_completed, null, 2)}'`}</code>
               </pre>
             </div>
           </div>

@@ -109,13 +109,14 @@ The application follows a monorepo pattern with shared types and schemas:
 
 ## Recent Updates
 
-### Webhook System for Sales and Clients (June 20, 2025)
-- Redesigned webhook system to focus on sales and client management (removed plan references)
-- Updated webhook events: sale_created, sale_completed, sale_cancelled, client_created, client_updated
-- Implemented webhook receiver endpoint at /api/webhook/sales for processing external data
-- Automatic client creation when receiving sales webhooks for new customers
-- Complete payload documentation with real-world examples for sales integration
-- Tested webhook functionality with successful data flow to dashboard and client pages
+### Advanced Webhook Sales Processing System (June 20, 2025)
+- Implemented intelligent webhook receiver for payment processing with phone-based client identification
+- Events: payment_pending, payment_completed, payment_failed, recovery_purchase
+- Phone number as unique client identifier (normalized format)
+- Automatic status management: pending → realized/lost → recovered
+- Lost sales logic: 48h expiration converts pending to lost
+- Recovery logic: clients with previous lost sales who purchase again get "recovered" status
+- Complete payload documentation with payment flow examples and auto-client creation
 
 ### Data Cleanup and Support System Redesign (June 20, 2025)
 - Removed all support ticket creation forms (clients submit externally, not through internal system)

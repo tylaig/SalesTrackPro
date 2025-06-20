@@ -29,11 +29,10 @@ const webhookFormSchema = z.object({
 });
 
 const AVAILABLE_EVENTS = [
-  { id: "sale_created", label: "Venda Criada" },
-  { id: "sale_completed", label: "Venda Finalizada" },
-  { id: "sale_cancelled", label: "Venda Cancelada" },
-  { id: "client_created", label: "Cliente Criado" },
-  { id: "client_updated", label: "Cliente Atualizado" },
+  { id: "payment_pending", label: "Pagamento Pendente" },
+  { id: "payment_completed", label: "Pagamento Realizado" },
+  { id: "payment_failed", label: "Pagamento Expirado/Falhado" },
+  { id: "recovery_purchase", label: "Compra de Recuperação" },
 ];
 
 type WebhookFormData = z.infer<typeof webhookFormSchema>;
