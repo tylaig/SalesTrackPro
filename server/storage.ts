@@ -213,31 +213,40 @@ export class DatabaseStorage implements IStorage {
     lostSales: number;
     totalClients: number;
   }> {
-    const [totalSalesResult] = await db
-      .select({ value: sql<number>`sum(${sales.value})` })
-      .from(sales)
-      .where(eq(sales.status, 'realized'));
+    try {
+      const [totalSalesResult] = await db
+        .select({ count: count(), value: sum(sales.value) })
+        .from(sales);
 
-    const [recoveredSalesResult] = await db
-      .select({ value: sql<number>`sum(${sales.value})` })
-      .from(sales)
-      .where(eq(sales.status, 'recovered'));
+      const [recoveredSalesResult] = await db
+        .select({ count: count(), value: sum(sales.value) })
+        .from(sales)
+        .where(eq(sales.status, 'recovered'));
 
-    const [lostSalesResult] = await db
-      .select({ value: sql<number>`sum(${sales.value})` })
-      .from(sales)
-      .where(eq(sales.status, 'lost'));
+      const [lostSalesResult] = await db
+        .select({ count: count(), value: sum(sales.value) })
+        .from(sales)
+        .where(eq(sales.status, 'lost'));
 
-    const [totalClientsResult] = await db
-      .select({ count: count() })
-      .from(clients);
+      const [totalClientsResult] = await db
+        .select({ count: count() })
+        .from(clients);
 
-    return {
-      totalSales: Number(totalSalesResult?.value || 0),
-      recoveredSales: Number(recoveredSalesResult?.value || 0),
-      lostSales: Number(lostSalesResult?.value || 0),
-      totalClients: totalClientsResult?.count || 0,
-    };
+      return {
+        totalSales: Number(totalSalesResult?.value || 0),
+        recoveredSales: Number(recoveredSalesResult?.value || 0),
+        lostSales: Number(lostSalesResult?.value || 0),
+        totalClients: totalClientsResult?.count || 0,
+      };
+    } catch (error) {
+      console.error('Error in getSalesMetrics:', error);
+      return {
+        totalSales: 0,
+        recoveredSales: 0,
+        lostSales: 0,
+        totalClients: 0,
+      };
+    }
   }
 
   async getSalesChart(): Promise<{

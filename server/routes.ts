@@ -85,21 +85,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sales metrics and charts
   app.get("/api/sales/metrics", async (req, res) => {
     try {
+      console.log("Fetching sales metrics...");
       const metrics = await storage.getSalesMetrics();
+      console.log("Sales metrics result:", metrics);
       res.json(metrics);
     } catch (error) {
       console.error("Error fetching sales metrics:", error);
-      res.status(500).json({ message: "Failed to fetch sales metrics" });
+      res.status(500).json({ message: "Failed to fetch sales metrics", error: error.message });
     }
   });
 
   app.get("/api/sales/charts", async (req, res) => {
     try {
+      console.log("Fetching sales charts...");
       const charts = await storage.getSalesChart();
+      console.log("Sales charts result:", charts);
       res.json(charts);
     } catch (error) {
       console.error("Error fetching sales charts:", error);
-      res.status(500).json({ message: "Failed to fetch chart data" });
+      res.status(500).json({ message: "Failed to fetch chart data", error: error.message });
     }
   });
 
