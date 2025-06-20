@@ -1,0 +1,130 @@
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, Bell } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import KPICards from "@/components/dashboard/KPICards";
+import SalesTrendChart from "@/components/charts/SalesTrendChart";
+import SalesDistributionChart from "@/components/charts/SalesDistributionChart";
+import SalesTable from "@/components/dashboard/SalesTable";
+import SupportForm from "@/components/support/SupportForm";
+import TicketsList from "@/components/support/TicketsList";
+import type { SaleWithClient } from "@shared/schema";
+
+export default function Dashboard() {
+  const { data: metrics, isLoading: metricsLoading } = useQuery({
+    queryKey: ["/api/sales/metrics"],
+    retry: false,
+  });
+
+  const { data: chartData, isLoading: chartLoading } = useQuery({
+    queryKey: ["/api/sales/charts"],
+    retry: false,
+  });
+
+  const { data: sales = [], isLoading: salesLoading } = useQuery<SaleWithClient[]>({
+    queryKey: ["/api/sales"],
+    retry: false,
+  });
+
+  const formatDate = () => {
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date());
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <header className="bg-surface shadow-sm border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-800">Dashboard de Vendas</h2>
+            <p className="text-sm text-gray-600">Atualizado em: {formatDate()}</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Calendar className="text-gray-500 h-4 w-4" />
+              <Select>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Últimos 30 dias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">Últimos 30 dias</SelectItem>
+                  <SelectItem value="7">Últimos 7 dias</SelectItem>
+                  <SelectItem value="this_month">Este mês</SelectItem>
+                  <SelectItem value="last_month">Mês anterior</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="ghost" size="sm" className="relative">
+              <Bell className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                3
+              </span>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Dashboard Content */}
+      <div className="p-6">
+        {/* KPI Cards */}
+        {metricsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 animate-pulse">
+                <div className="h-20 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        ) : metrics ? (
+          <KPICards metrics={metrics} />
+        ) : (
+          <div className="mb-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800">Não foi possível carregar as métricas de vendas.</p>
+          </div>
+        )}
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {chartLoading ? (
+            <>
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 animate-pulse">
+                <div className="h-64 bg-gray-200 rounded"></div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 animate-pulse">
+                <div className="h-64 bg-gray-200 rounded"></div>
+              </div>
+            </>
+          ) : chartData ? (
+            <>
+              <SalesTrendChart data={chartData} />
+              <SalesDistributionChart data={chartData} />
+            </>
+          ) : (
+            <div className="col-span-2 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800">Não foi possível carregar os dados dos gráficos.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Recent Sales Table */}
+        {salesLoading ? (
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 animate-pulse mb-8">
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        ) : (
+          <SalesTable sales={sales} />
+        )}
+
+        {/* Support Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SupportForm />
+          <TicketsList />
+        </div>
+      </div>
+    </div>
+  );
+}

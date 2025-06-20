@@ -1,0 +1,67 @@
+import { Link, useLocation } from "wouter";
+import { 
+  TrendingUp, 
+  ShoppingCart, 
+  Users, 
+  Headphones, 
+  FileText,
+  UserCircle
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const navigation = [
+  { name: "Dashboard", href: "/", icon: TrendingUp },
+  { name: "Vendas", href: "/sales", icon: ShoppingCart },
+  { name: "Clientes", href: "/clients", icon: Users },
+  { name: "Suporte", href: "/support", icon: Headphones },
+  { name: "Relatórios", href: "/reports", icon: FileText },
+];
+
+export default function Sidebar() {
+  const [location] = useLocation();
+
+  return (
+    <aside className="w-64 bg-surface shadow-lg">
+      <div className="p-6 border-b border-gray-200">
+        <h1 className="text-xl font-semibold text-gray-800 flex items-center">
+          <TrendingUp className="text-primary mr-2 h-6 w-6" />
+          Dashboard Vendas
+        </h1>
+      </div>
+      
+      <nav className="mt-6">
+        <div className="px-6 mb-6">
+          <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border-l-4 border-primary">
+            <UserCircle className="text-primary h-8 w-8" />
+            <div>
+              <p className="text-sm font-medium text-gray-800">João Silva</p>
+              <p className="text-xs text-gray-500">Cliente Premium</p>
+            </div>
+          </div>
+        </div>
+        
+        <ul className="space-y-2 px-4">
+          {navigation.map((item) => {
+            const isActive = location === item.href || (item.href === "/" && location === "/dashboard");
+            return (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center space-x-3 p-3 rounded-lg transition-colors",
+                    isActive
+                      ? "bg-primary text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.name}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </aside>
+  );
+}
