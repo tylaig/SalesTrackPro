@@ -214,29 +214,19 @@ export class DatabaseStorage implements IStorage {
     totalClients: number;
   }> {
     try {
-      const [totalSalesResult] = await db
-        .select({ count: count(), value: sum(sales.value) })
-        .from(sales);
+      // Get basic counts and totals safely
+      const allSales = await db.select().from(sales);
+      const allClients = await db.select().from(clients);
 
-      const [recoveredSalesResult] = await db
-        .select({ count: count(), value: sum(sales.value) })
-        .from(sales)
-        .where(eq(sales.status, 'recovered'));
-
-      const [lostSalesResult] = await db
-        .select({ count: count(), value: sum(sales.value) })
-        .from(sales)
-        .where(eq(sales.status, 'lost'));
-
-      const [totalClientsResult] = await db
-        .select({ count: count() })
-        .from(clients);
+      const totalSalesValue = allSales.reduce((sum, sale) => sum + (Number(sale.value) || 0), 0);
+      const recoveredSalesValue = allSales.filter(s => s.status === 'recovered').reduce((sum, sale) => sum + (Number(sale.value) || 0), 0);
+      const lostSalesValue = allSales.filter(s => s.status === 'lost').reduce((sum, sale) => sum + (Number(sale.value) || 0), 0);
 
       return {
-        totalSales: Number(totalSalesResult?.value || 0),
-        recoveredSales: Number(recoveredSalesResult?.value || 0),
-        lostSales: Number(lostSalesResult?.value || 0),
-        totalClients: totalClientsResult?.count || 0,
+        totalSales: totalSalesValue,
+        recoveredSales: recoveredSalesValue,
+        lostSales: lostSalesValue,
+        totalClients: allClients.length,
       };
     } catch (error) {
       console.error('Error in getSalesMetrics:', error);
@@ -254,35 +244,40 @@ export class DatabaseStorage implements IStorage {
     distribution: { status: string; count: number; value: number }[];
   }> {
     try {
-      // Distribution data
-      const distributionData = await db
-        .select({
-          status: sales.status,
-          count: count(),
-          value: sum(sales.value)
-        })
-        .from(sales)
-        .groupBy(sales.status);
+      // Get all sales data safely
+      const allSales = await db.select().from(sales);
+      
+      // Calculate distribution manually
+      const statusGroups = allSales.reduce((acc, sale) => {
+        const status = sale.status;
+        if (!acc[status]) {
+          acc[status] = { count: 0, value: 0 };
+        }
+        acc[status].count++;
+        acc[status].value += Number(sale.value) || 0;
+        return acc;
+      }, {} as Record<string, { count: number; value: number }>);
 
-      // Simplified monthly data based on current sales
-      const [totalSales] = await db.select({ count: count() }).from(sales);
-      const [realizedSales] = await db.select({ count: count() }).from(sales).where(eq(sales.status, 'realized'));
-      const [recoveredSales] = await db.select({ count: count() }).from(sales).where(eq(sales.status, 'recovered'));
-      const [lostSales] = await db.select({ count: count() }).from(sales).where(eq(sales.status, 'lost'));
+      const distributionData = Object.entries(statusGroups).map(([status, data]) => ({
+        status,
+        count: data.count,
+        value: data.value
+      }));
+
+      // Calculate counts for monthly data
+      const realizedCount = allSales.filter(s => s.status === 'realized').length;
+      const recoveredCount = allSales.filter(s => s.status === 'recovered').length;
+      const lostCount = allSales.filter(s => s.status === 'lost').length;
 
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
       const monthly = months.map(month => ({
         month,
-        realized: Math.floor((realizedSales.count / 6) + Math.random() * 5),
-        recovered: Math.floor((recoveredSales.count / 6) + Math.random() * 3),
-        lost: Math.floor((lostSales.count / 6) + Math.random() * 2)
+        realized: Math.floor((realizedCount / 6) + Math.random() * 3),
+        recovered: Math.floor((recoveredCount / 6) + Math.random() * 2),
+        lost: Math.floor((lostCount / 6) + Math.random() * 1)
       }));
 
-      const distribution = distributionData.map(row => ({
-        status: row.status,
-        count: row.count,
-        value: Number(row.value) || 0
-      }));
+      const distribution = distributionData;
 
       return { monthly, distribution };
     } catch (error) {
