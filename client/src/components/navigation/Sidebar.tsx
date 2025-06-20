@@ -29,7 +29,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
   const [location] = useLocation();
 
   return (
-    <aside className="w-64 bg-surface shadow-lg">
+    <aside className="w-64 bg-surface shadow-lg h-screen sticky top-0 overflow-y-auto">
       <div className="p-6 border-b border-gray-200">
         <h1 className="text-xl font-semibold text-gray-800 flex items-center">
           <TrendingUp className="text-primary mr-2 h-6 w-6" />
