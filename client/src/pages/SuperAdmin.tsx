@@ -254,8 +254,15 @@ export default function SuperAdmin() {
             <PlansManagement />
           </TabsContent>
 
-          <TabsContent value="webhooks" className="w-full">
-            <WebhooksManagement />
+          <TabsContent value="webhooks" className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <WebhooksManagement />
+              </div>
+              <div className="space-y-6">
+                <WebhookDocumentation />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="chips" className="w-full">

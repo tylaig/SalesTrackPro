@@ -284,11 +284,26 @@ export default function WebhooksManagement() {
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {(webhook.events && webhook.events.length > 0 ? webhook.events : []).map((event: any, index: number) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {typeof event === 'string' ? event : event.eventType || 'Unknown'}
-                      </Badge>
-                    ))}
+                    {(() => {
+                      let events: string[] = [];
+                      try {
+                        if (Array.isArray(webhook.events)) {
+                          events = webhook.events.map(e => typeof e === 'string' ? e : e.eventType || '').filter(Boolean);
+                        } else if (typeof webhook.events === 'string' && webhook.events.trim()) {
+                          events = JSON.parse(webhook.events);
+                        }
+                      } catch (error) {
+                        events = [];
+                      }
+                      
+                      return events.length > 0 ? events.map((event: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {AVAILABLE_EVENTS.find(e => e.id === event)?.label || event}
+                        </Badge>
+                      )) : (
+                        <span className="text-xs text-gray-400">Nenhum evento</span>
+                      );
+                    })()}
                   </div>
                 </TableCell>
                 <TableCell>
