@@ -417,6 +417,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Webhook receiver endpoint for sales and clients
+  app.post("/api/webhook/sales", async (req, res) => {
+    try {
+      const payload = req.body;
+      console.log("Webhook received:", payload);
+
+      switch (payload.event_type) {
+        case 'sale_created':
+        case 'sale_completed':
+          // Check if client exists, create if not
+          let client;
+          const existingClient = await storage.getClients().then(clients => 
+            clients.find(c => c.email === payload.client.email)
+          );
+          
+          if (!existingClient) {
+            client = await storage.createClient({
+              name: payload.client.name,
+              email: payload.client.email,
+              phone: payload.client.phone || '',
+              company: payload.client.company || ''
+            });
+          } else {
+            client = existingClient;
+          }
+
+          // Create sale
+          await storage.createSale({
+            clientId: client.id,
+            product: payload.product,
+            value: payload.value,
+            status: payload.status === 'completed' ? 'realized' : payload.status,
+            date: new Date(payload.timestamp),
+            notes: payload.notes || ''
+          });
+          break;
+
+        case 'client_created':
+        case 'client_updated':
+          // Create or update client
+          const existingClientByEmail = await storage.getClients().then(clients => 
+            clients.find(c => c.email === payload.client.email)
+          );
+          
+          if (!existingClientByEmail) {
+            await storage.createClient({
+              name: payload.client.name,
+              email: payload.client.email,
+              phone: payload.client.phone || '',
+              company: payload.client.company || ''
+            });
+          }
+          break;
+      }
+
+      res.status(200).json({ received: true });
+    } catch (error) {
+      console.error("Error processing webhook:", error);
+      res.status(500).json({ message: "Failed to process webhook" });
+    }
+  });
+
   // WhatsApp chips management
   app.get("/api/admin/whatsapp-chips", async (req, res) => {
     try {

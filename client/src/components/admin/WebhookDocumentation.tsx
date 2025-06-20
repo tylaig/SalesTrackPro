@@ -16,49 +16,49 @@ export default function WebhookDocumentation() {
   };
 
   const payloadExamples = {
-    payment_pending: {
-      event_type: "payment_pending",
-      payment_id: "pay_123456789",
-      user_id: "user_987654321",
-      amount: 99.90,
-      currency: "BRL",
-      method: "credit_card",
+    sale_created: {
+      event_type: "sale_created",
+      sale_id: "sale_123456789",
+      client: {
+        name: "João Silva",
+        email: "joao@empresa.com",
+        phone: "(11) 99999-1111",
+        company: "Tech Solutions"
+      },
+      product: "Software de Gestão",
+      value: 25000.00,
+      status: "pending",
+      created_at: "2025-06-20T22:30:00Z",
       timestamp: "2025-06-20T22:30:00Z",
-      metadata: {
-        plan_id: "plan_basic",
-        billing_cycle: "monthly"
-      }
+      notes: "Proposta enviada ao cliente"
     },
-    payment_approved: {
-      event_type: "payment_approved",
-      payment_id: "pay_123456789",
-      user_id: "user_987654321",
-      amount: 99.90,
-      currency: "BRL",
-      method: "credit_card",
-      transaction_id: "txn_abc123def456",
-      approved_at: "2025-06-20T22:35:00Z",
+    sale_completed: {
+      event_type: "sale_completed",
+      sale_id: "sale_123456789",
+      client: {
+        name: "João Silva", 
+        email: "joao@empresa.com",
+        phone: "(11) 99999-1111",
+        company: "Tech Solutions"
+      },
+      product: "Software de Gestão",
+      value: 25000.00,
+      status: "realized",
+      completed_at: "2025-06-20T22:35:00Z",
       timestamp: "2025-06-20T22:35:00Z",
-      metadata: {
-        plan_id: "plan_basic",
-        billing_cycle: "monthly"
-      }
+      notes: "Venda finalizada com sucesso"
     },
-    payment_failed: {
-      event_type: "payment_failed",
-      payment_id: "pay_123456789",
-      user_id: "user_987654321",
-      amount: 99.90,
-      currency: "BRL",
-      method: "credit_card",
-      error_code: "insufficient_funds",
-      error_message: "Saldo insuficiente",
-      failed_at: "2025-06-20T22:30:30Z",
-      timestamp: "2025-06-20T22:30:30Z",
-      metadata: {
-        plan_id: "plan_basic",
-        billing_cycle: "monthly"
-      }
+    client_created: {
+      event_type: "client_created",
+      client: {
+        name: "Maria Santos",
+        email: "maria@startup.com", 
+        phone: "(11) 99999-2222",
+        company: "StartupX"
+      },
+      created_at: "2025-06-20T22:30:00Z",
+      timestamp: "2025-06-20T22:30:00Z",
+      source: "website_form"
     }
   };
 
@@ -93,9 +93,11 @@ export default function WebhookDocumentation() {
             <div>
               <h4 className="font-medium mb-2">Eventos Suportados</h4>
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="outline">payment_pending</Badge>
-                <Badge variant="outline">payment_approved</Badge>
-                <Badge variant="outline">payment_failed</Badge>
+                <Badge variant="outline">sale_created</Badge>
+                <Badge variant="outline">sale_completed</Badge>
+                <Badge variant="outline">sale_cancelled</Badge>
+                <Badge variant="outline">client_created</Badge>
+                <Badge variant="outline">client_updated</Badge>
               </div>
             </div>
           </div>
@@ -136,7 +138,7 @@ export default function WebhookDocumentation() {
             <div>
               <h4 className="font-medium mb-2">Exemplo de Endpoint (Node.js/Express)</h4>
               <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{`app.post('/webhook/payment', (req, res) => {
+                <code>{`app.post('/webhook/sales', (req, res) => {
   const payload = req.body;
   
   // Verificar assinatura (recomendado)
@@ -144,15 +146,17 @@ export default function WebhookDocumentation() {
   
   // Processar evento
   switch (payload.event_type) {
-    case 'payment_pending':
-      console.log('Pagamento pendente:', payload);
+    case 'sale_created':
+      console.log('Nova venda criada:', payload);
+      // Registrar venda no sistema
       break;
-    case 'payment_approved':
-      console.log('Pagamento aprovado:', payload);
-      // Ativar plano do usuário
+    case 'sale_completed':
+      console.log('Venda finalizada:', payload);
+      // Atualizar status da venda
       break;
-    case 'payment_failed':
-      console.log('Pagamento falhou:', payload);
+    case 'client_created':
+      console.log('Novo cliente:', payload);
+      // Adicionar cliente ao banco
       break;
   }
   
@@ -165,10 +169,10 @@ export default function WebhookDocumentation() {
             <div>
               <h4 className="font-medium mb-2">Teste com cURL</h4>
               <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{`curl -X POST https://seu-site.com/webhook/payment \\
+                <code>{`curl -X POST https://seu-site.com/webhook/sales \\
   -H "Content-Type: application/json" \\
   -H "User-Agent: WebhookSystem/1.0" \\
-  -d '${JSON.stringify(payloadExamples.payment_approved, null, 2)}'`}</code>
+  -d '${JSON.stringify(payloadExamples.sale_completed, null, 2)}'`}</code>
               </pre>
             </div>
           </div>

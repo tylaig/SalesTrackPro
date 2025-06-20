@@ -109,13 +109,13 @@ The application follows a monorepo pattern with shared types and schemas:
 
 ## Recent Updates
 
-### Webhook System Fix and Documentation (June 20, 2025)
-- Fixed webhook events parsing error in WebhooksManagement component
-- Added comprehensive webhook documentation with payload examples
-- Created WebhookDocumentation component with complete API specifications
-- Added payload examples for payment_pending, payment_approved, and payment_failed events
-- Included implementation examples for Node.js/Express and cURL testing
-- Enhanced Super Admin webhooks page with side-by-side management and documentation
+### Webhook System for Sales and Clients (June 20, 2025)
+- Redesigned webhook system to focus on sales and client management (removed plan references)
+- Updated webhook events: sale_created, sale_completed, sale_cancelled, client_created, client_updated
+- Implemented webhook receiver endpoint at /api/webhook/sales for processing external data
+- Automatic client creation when receiving sales webhooks for new customers
+- Complete payload documentation with real-world examples for sales integration
+- Tested webhook functionality with successful data flow to dashboard and client pages
 
 ### Data Cleanup and Support System Redesign (June 20, 2025)
 - Removed all support ticket creation forms (clients submit externally, not through internal system)
