@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Search, Filter, Mail, Phone, Building } from "lucide-react";
+import { Plus, Search, Filter, Mail, Phone, Building, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { Client } from "@shared/schema";
+import ClientEventHistory from "@/components/client/ClientEventHistory";
 
 export default function Clients() {
   const { data: clients = [], isLoading } = useQuery<Client[]>({
@@ -131,13 +133,23 @@ export default function Clients() {
                           {formatDate(client.createdAt)}
                         </TableCell>
                         <TableCell className="px-6 py-4">
-                          <div className="flex space-x-2">
-                            <Button variant="ghost" size="sm">
-                              Editar
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-red-600">
-                              Excluir
-                            </Button>
+                          <div className="flex gap-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <History className="w-4 h-4 mr-2" />
+                                  Histórico
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    Histórico de Eventos - {client.name}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <ClientEventHistory clientId={client.id} />
+                              </DialogContent>
+                            </Dialog>
                           </div>
                         </TableCell>
                       </TableRow>

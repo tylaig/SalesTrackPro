@@ -83,6 +83,11 @@ export interface IStorage {
   getWebhookEvents(webhookId?: number): Promise<WebhookEvent[]>;
   createWebhookEvent(event: InsertWebhookEvent): Promise<WebhookEvent>;
 
+  // Client Events
+  getClientEvents(clientId?: number): Promise<ClientEvent[]>;
+  createClientEvent(event: InsertClientEvent): Promise<ClientEvent>;
+  getClientWithEvents(clientId: number): Promise<ClientWithEvents | undefined>;
+
   // Super Admin - Users Management
   getAllUsers(): Promise<User[]>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
@@ -691,6 +696,28 @@ export class DatabaseStorage implements IStorage {
       totalSalesValue: Number(totalSales.total) || 0,
       totalRecoveredValue: Number(recoveredSales.total) || 0,
     };
+  }
+
+  // Client Events
+  async getClientEvents(clientId?: number): Promise<ClientEvent[]> {
+    const query = db.select().from(clientEvents);
+    if (clientId) {
+      return await query.where(eq(clientEvents.clientId, clientId)).orderBy(desc(clientEvents.createdAt));
+    }
+    return await query.orderBy(desc(clientEvents.createdAt));
+  }
+
+  async createClientEvent(event: InsertClientEvent): Promise<ClientEvent> {
+    const [newEvent] = await db.insert(clientEvents).values(event).returning();
+    return newEvent;
+  }
+
+  async getClientWithEvents(clientId: number): Promise<ClientWithEvents | undefined> {
+    const client = await this.getClient(clientId);
+    if (!client) return undefined;
+    
+    const events = await this.getClientEvents(clientId);
+    return { ...client, events };
   }
 }
 

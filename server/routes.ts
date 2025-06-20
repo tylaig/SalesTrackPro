@@ -417,6 +417,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client events endpoint
+  app.get("/api/clients/:id/events", async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.id);
+      const events = await storage.getClientEvents(clientId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching client events:", error);
+      res.status(500).json({ message: "Failed to fetch client events" });
+    }
+  });
+
   // Webhook receiver endpoint for sales and clients
   app.post("/api/webhook/sales", async (req, res) => {
     try {
@@ -445,10 +457,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get client's event history to determine recovery status
+      const clientEvents = await storage.getClientEvents(client.id);
+      let sale: any = null;
+
       switch (payload.event_type) {
         case 'payment_pending':
           // Create pending sale
-          await storage.createSale({
+          sale = await storage.createSale({
             clientId: client.id,
             product: payload.product,
             value: payload.value,
@@ -456,10 +472,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             date: new Date(payload.timestamp),
             notes: `${payload.payment_method} - ${payload.transaction_id}`
           });
+
+          // Log event
+          await storage.createClientEvent({
+            clientId: client.id,
+            eventType: 'payment_pending',
+            transactionId: payload.transaction_id,
+            saleId: sale.id,
+            product: payload.product,
+            value: payload.value,
+            paymentMethod: payload.payment_method,
+            metadata: { expires_at: payload.expires_at }
+          });
           break;
 
         case 'payment_completed':
-          // Find pending sale and update to realized
+          // Find pending sale and update to realized OR check if should be recovery
           const sales = await storage.getSales();
           const pendingSale = sales.find(s => 
             s.clientId === client.id && 
@@ -467,22 +495,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
             s.notes?.includes(payload.transaction_id)
           );
 
+          // Check if client has previous lost sales (for automatic recovery detection)
+          const hasLostSales = clientEvents.some(e => e.eventType === 'payment_failed');
+          const isRecovery = hasLostSales && !pendingSale; // New purchase after previous loss
+
+          let status = 'realized';
+          if (isRecovery) status = 'recovered';
+
           if (pendingSale) {
             await storage.updateSale(pendingSale.id, {
-              status: 'realized',
+              status: status,
               notes: `${pendingSale.notes} - Pago em ${new Date(payload.timestamp).toLocaleString()}`
             });
+            sale = pendingSale;
           } else {
-            // Create new realized sale if no pending found
-            await storage.createSale({
+            // Create new sale
+            sale = await storage.createSale({
               clientId: client.id,
               product: payload.product,
               value: payload.value,
-              status: 'realized',
+              status: status,
               date: new Date(payload.timestamp),
-              notes: `${payload.payment_method} - ${payload.transaction_id} - Direto`
+              notes: `${payload.payment_method} - ${payload.transaction_id} - ${isRecovery ? 'Recuperação automática' : 'Direto'}`
             });
           }
+
+          // Log event
+          await storage.createClientEvent({
+            clientId: client.id,
+            eventType: 'payment_completed',
+            transactionId: payload.transaction_id,
+            saleId: sale.id,
+            product: payload.product,
+            value: payload.value,
+            paymentMethod: payload.payment_method,
+            metadata: { recovery_detected: isRecovery }
+          });
           break;
 
         case 'payment_failed':
@@ -499,30 +547,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: 'lost',
               notes: `${expiredSale.notes} - Expirado/Falhado em ${new Date(payload.timestamp).toLocaleString()}`
             });
+
+            // Log event
+            await storage.createClientEvent({
+              clientId: client.id,
+              eventType: 'payment_failed',
+              transactionId: payload.transaction_id,
+              saleId: expiredSale.id,
+              product: payload.product,
+              value: payload.value,
+              paymentMethod: payload.payment_method,
+              metadata: { reason: payload.reason }
+            });
           }
           break;
 
         case 'recovery_purchase':
-          // Check if client has any lost sales
-          const clientSales = await storage.getSales();
-          const hasLostSales = clientSales.some(s => 
-            s.clientId === client.id && s.status === 'lost'
-          );
-
-          const status = hasLostSales ? 'recovered' : 'realized';
-          
-          await storage.createSale({
+          // Explicit recovery purchase (manual or identified)
+          sale = await storage.createSale({
             clientId: client.id,
             product: payload.product,
             value: payload.value,
-            status: status,
+            status: 'recovered',
             date: new Date(payload.timestamp),
-            notes: `${payload.payment_method} - ${payload.transaction_id} - ${status === 'recovered' ? 'Recuperação' : 'Nova'}`
+            notes: `${payload.payment_method} - ${payload.transaction_id} - Recuperação manual`
+          });
+
+          // Log event
+          await storage.createClientEvent({
+            clientId: client.id,
+            eventType: 'recovery_purchase',
+            transactionId: payload.transaction_id,
+            saleId: sale.id,
+            product: payload.product,
+            value: payload.value,
+            paymentMethod: payload.payment_method,
+            metadata: { original_transaction: payload.original_transaction }
           });
           break;
       }
 
-      res.status(200).json({ received: true });
+      res.status(200).json({ received: true, client_id: client.id, sale_id: sale?.id });
     } catch (error) {
       console.error("Error processing webhook:", error);
       res.status(500).json({ message: "Failed to process webhook" });

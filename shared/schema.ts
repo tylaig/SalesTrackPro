@@ -169,6 +169,20 @@ export const webhookEvents = pgTable("webhook_events", {
   sentAt: timestamp("sent_at"),
 });
 
+// Client event history table
+export const clientEvents = pgTable("client_events", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: "cascade" }),
+  eventType: varchar("event_type", { length: 100 }).notNull(),
+  transactionId: varchar("transaction_id", { length: 255 }),
+  saleId: integer("sale_id").references(() => sales.id, { onDelete: "cascade" }),
+  product: varchar("product", { length: 255 }),
+  value: decimal("value", { precision: 10, scale: 2 }),
+  paymentMethod: varchar("payment_method", { length: 100 }),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const plansRelations = relations(plans, ({ many }) => ({
   userPlans: many(userPlans),
@@ -203,12 +217,24 @@ export const webhookEventsRelations = relations(webhookEvents, ({ one }) => ({
   }),
 }));
 
+export const clientEventsRelations = relations(clientEvents, ({ one }) => ({
+  client: one(clients, {
+    fields: [clientEvents.clientId],
+    references: [clients.id],
+  }),
+  sale: one(sales, {
+    fields: [clientEvents.saleId],
+    references: [sales.id],
+  }),
+}));
+
 // Insert schemas
 export const insertPlanSchema = createInsertSchema(plans);
 export const insertWebhookSchema = createInsertSchema(webhooks);
 export const insertWhatsappChipSchema = createInsertSchema(whatsappChips);
 export const insertUserPlanSchema = createInsertSchema(userPlans);
 export const insertWebhookEventSchema = createInsertSchema(webhookEvents);
+export const insertClientEventSchema = createInsertSchema(clientEvents);
 
 // Types
 export type InsertPlan = z.infer<typeof insertPlanSchema>;
@@ -226,6 +252,9 @@ export type UserPlan = typeof userPlans.$inferSelect;
 export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
 export type WebhookEvent = typeof webhookEvents.$inferSelect;
 
+export type InsertClientEvent = z.infer<typeof insertClientEventSchema>;
+export type ClientEvent = typeof clientEvents.$inferSelect;
+
 export type UserPlanWithDetails = UserPlan & {
   user: User;
   plan: Plan;
@@ -237,4 +266,8 @@ export type WebhookWithEvents = Webhook & {
 
 export type WhatsappChipWithClient = WhatsappChip & {
   client?: Client;
+};
+
+export type ClientWithEvents = Client & {
+  events: ClientEvent[];
 };
