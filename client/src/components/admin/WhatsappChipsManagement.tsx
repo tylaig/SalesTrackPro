@@ -287,7 +287,7 @@ export default function WhatsappChipsManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(chips as WhatsappChipWithClient[]).map((chip: WhatsappChipWithClient) => (
+            {(chips as any[]).map((chip: any) => (
               <TableRow key={chip.id}>
                 <TableCell className="font-medium">{chip.chipId}</TableCell>
                 <TableCell>{chip.phoneNumber}</TableCell>
