@@ -11,6 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit, Trash2, Globe, Play } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,10 +23,18 @@ import type { Webhook } from "@shared/schema";
 const webhookFormSchema = z.object({
   name: z.string().min(1, "Webhook name is required"),
   url: z.string().url("Invalid URL"),
-  events: z.string().optional(),
+  events: z.string().min(1, "Please select an event"),
   secret: z.string().optional(),
   isActive: z.boolean().default(true),
 });
+
+const AVAILABLE_EVENTS = [
+  { id: "sale_created", label: "Venda Criada" },
+  { id: "sale_completed", label: "Venda Finalizada" },
+  { id: "sale_cancelled", label: "Venda Cancelada" },
+  { id: "client_created", label: "Cliente Criado" },
+  { id: "client_updated", label: "Cliente Atualizado" },
+];
 
 type WebhookFormData = z.infer<typeof webhookFormSchema>;
 
@@ -51,7 +62,7 @@ export default function WebhooksManagement() {
     mutationFn: async (data: WebhookFormData) => {
       const webhookData = {
         ...data,
-        events: data.events ? JSON.stringify(data.events.split('\n').filter(e => e.trim())) : "[]",
+        events: JSON.stringify([data.events]),
       };
       return apiRequest("POST", "/api/admin/webhooks", webhookData);
     },
@@ -77,7 +88,7 @@ export default function WebhooksManagement() {
     mutationFn: async (data: WebhookFormData) => {
       const webhookData = {
         ...data,
-        events: data.events ? JSON.stringify(data.events.split('\n').filter(e => e.trim())) : "[]",
+        events: JSON.stringify([data.events]),
       };
       return apiRequest("PUT", `/api/admin/webhooks/${editingWebhook?.id}`, webhookData);
     },
@@ -155,11 +166,18 @@ export default function WebhooksManagement() {
 
   const handleEdit = (webhook: Webhook) => {
     setEditingWebhook(webhook);
-    const events = JSON.parse(webhook.events || "[]");
+    let eventValue = "";
+    try {
+      const events = JSON.parse(webhook.events || "[]");
+      eventValue = Array.isArray(events) && events.length > 0 ? events[0] : "";
+    } catch (error) {
+      eventValue = "";
+    }
+    
     form.reset({
       name: webhook.name,
       url: webhook.url,
-      events: Array.isArray(events) ? events.join('\n') : "",
+      events: eventValue,
       secret: webhook.secret || "",
       isActive: webhook.isActive || false,
     });
@@ -210,7 +228,8 @@ export default function WebhooksManagement() {
                   {editingWebhook ? "Update webhook configuration" : "Create a new webhook endpoint"}
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Webhook Name</Label>
                   <Input
@@ -227,14 +246,30 @@ export default function WebhooksManagement() {
                     placeholder="https://example.com/webhook"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="events">Events (one per line)</Label>
-                  <Textarea
-                    id="events"
-                    {...form.register("events")}
-                    placeholder="payment_pending&#10;payment_approved"
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="events"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Evento</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um evento" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {AVAILABLE_EVENTS.map((event) => (
+                            <SelectItem key={event.id} value={event.id}>
+                              {event.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <div>
                   <Label htmlFor="secret">Secret Key (optional)</Label>
                   <Input
@@ -259,6 +294,7 @@ export default function WebhooksManagement() {
                   </Button>
                 </DialogFooter>
               </form>
+              </Form>
             </DialogContent>
           </Dialog>
         </div>
@@ -296,11 +332,14 @@ export default function WebhooksManagement() {
                         events = [];
                       }
                       
-                      return events.length > 0 ? events.map((event: string, index: number) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {AVAILABLE_EVENTS.find(e => e.id === event)?.label || event}
-                        </Badge>
-                      )) : (
+                      return events.length > 0 ? events.map((event: string, index: number) => {
+                        const eventInfo = AVAILABLE_EVENTS.find(e => e.id === event);
+                        return (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {eventInfo?.label || event}
+                          </Badge>
+                        );
+                      }) : (
                         <span className="text-xs text-gray-400">Nenhum evento</span>
                       );
                     })()}
