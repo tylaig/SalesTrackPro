@@ -50,11 +50,7 @@ export default function WhatsappChipsManagement() {
 
   const createChipMutation = useMutation({
     mutationFn: async (data: ChipFormData) => {
-      return apiRequest("/api/admin/whatsapp-chips", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiRequest("POST", "/api/admin/whatsapp-chips", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/whatsapp-chips"] });
@@ -76,11 +72,7 @@ export default function WhatsappChipsManagement() {
 
   const updateChipMutation = useMutation({
     mutationFn: async (data: ChipFormData) => {
-      return apiRequest(`/api/admin/whatsapp-chips/${editingChip?.id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiRequest("PUT", `/api/admin/whatsapp-chips/${editingChip?.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/whatsapp-chips"] });
@@ -261,7 +253,7 @@ export default function WhatsappChipsManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">No client</SelectItem>
-                      {clients.map((client: Client) => (
+                      {(clients as Client[]).map((client: Client) => (
                         <SelectItem key={client.id} value={client.id.toString()}>
                           {client.name}
                         </SelectItem>
@@ -295,7 +287,7 @@ export default function WhatsappChipsManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {chips.map((chip: WhatsappChip) => (
+            {(chips as WhatsappChipWithClient[]).map((chip: WhatsappChipWithClient) => (
               <TableRow key={chip.id}>
                 <TableCell className="font-medium">{chip.chipId}</TableCell>
                 <TableCell>{chip.phoneNumber}</TableCell>

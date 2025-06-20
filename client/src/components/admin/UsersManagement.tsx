@@ -43,11 +43,7 @@ export default function UsersManagement() {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: UserFormData) => {
-      return apiRequest("/api/admin/users", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiRequest("POST", "/api/admin/users", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -69,11 +65,7 @@ export default function UsersManagement() {
 
   const updateUserMutation = useMutation({
     mutationFn: async (data: UserFormData) => {
-      return apiRequest(`/api/admin/users/${editingUser?.id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiRequest("PUT", `/api/admin/users/${editingUser?.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -247,7 +239,7 @@ export default function UsersManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user: User) => (
+            {(users as User[]).map((user: User) => (
               <TableRow key={user.id}>
                 <TableCell>{user.id}</TableCell>
                 <TableCell>

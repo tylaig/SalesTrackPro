@@ -53,14 +53,11 @@ export default function PlansManagement() {
 
   const createPlanMutation = useMutation({
     mutationFn: async (data: PlanFormData) => {
-      return apiRequest("/api/admin/plans", {
-        method: "POST",
-        body: JSON.stringify({
-          ...data,
-          features: data.features ? JSON.stringify(data.features.split('\n').filter(f => f.trim())) : "[]",
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const planData = {
+        ...data,
+        features: data.features ? JSON.stringify(data.features.split('\n').filter(f => f.trim())) : "[]",
+      };
+      return apiRequest("POST", "/api/admin/plans", planData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
@@ -82,14 +79,11 @@ export default function PlansManagement() {
 
   const updatePlanMutation = useMutation({
     mutationFn: async (data: PlanFormData) => {
-      return apiRequest(`/api/admin/plans/${editingPlan?.id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          ...data,
-          features: data.features ? JSON.stringify(data.features.split('\n').filter(f => f.trim())) : "[]",
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const planData = {
+        ...data,
+        features: data.features ? JSON.stringify(data.features.split('\n').filter(f => f.trim())) : "[]",
+      };
+      return apiRequest("PUT", `/api/admin/plans/${editingPlan?.id}`, planData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
@@ -282,7 +276,7 @@ export default function PlansManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {plans.map((plan: Plan) => (
+            {(plans as Plan[]).map((plan: Plan) => (
               <TableRow key={plan.id}>
                 <TableCell>
                   <div>

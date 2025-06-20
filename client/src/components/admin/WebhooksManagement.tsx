@@ -49,14 +49,11 @@ export default function WebhooksManagement() {
 
   const createWebhookMutation = useMutation({
     mutationFn: async (data: WebhookFormData) => {
-      return apiRequest("/api/admin/webhooks", {
-        method: "POST",
-        body: JSON.stringify({
-          ...data,
-          events: data.events ? JSON.stringify(data.events.split('\n').filter(e => e.trim())) : "[]",
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const webhookData = {
+        ...data,
+        events: data.events ? JSON.stringify(data.events.split('\n').filter(e => e.trim())) : "[]",
+      };
+      return apiRequest("POST", "/api/admin/webhooks", webhookData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/webhooks"] });
@@ -78,14 +75,11 @@ export default function WebhooksManagement() {
 
   const updateWebhookMutation = useMutation({
     mutationFn: async (data: WebhookFormData) => {
-      return apiRequest(`/api/admin/webhooks/${editingWebhook?.id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          ...data,
-          events: data.events ? JSON.stringify(data.events.split('\n').filter(e => e.trim())) : "[]",
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const webhookData = {
+        ...data,
+        events: data.events ? JSON.stringify(data.events.split('\n').filter(e => e.trim())) : "[]",
+      };
+      return apiRequest("PUT", `/api/admin/webhooks/${editingWebhook?.id}`, webhookData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/webhooks"] });
@@ -130,14 +124,11 @@ export default function WebhooksManagement() {
 
   const triggerWebhookMutation = useMutation({
     mutationFn: async (webhookId: number) => {
-      return apiRequest(`/api/admin/webhooks/${webhookId}/trigger`, {
-        method: "POST",
-        body: JSON.stringify({
-          eventType: "test",
-          payload: { message: "Test webhook trigger", timestamp: new Date().toISOString() },
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const triggerData = {
+        eventType: "test",
+        payload: { message: "Test webhook trigger", timestamp: new Date().toISOString() },
+      };
+      return apiRequest("POST", `/api/admin/webhooks/${webhookId}/trigger`, triggerData);
     },
     onSuccess: () => {
       toast({
@@ -285,7 +276,7 @@ export default function WebhooksManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {webhooks.map((webhook: Webhook) => (
+            {(webhooks as Webhook[]).map((webhook: Webhook) => (
               <TableRow key={webhook.id}>
                 <TableCell className="font-medium">{webhook.name}</TableCell>
                 <TableCell className="text-sm text-muted-foreground max-w-xs truncate">

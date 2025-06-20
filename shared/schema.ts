@@ -226,10 +226,6 @@ export type UserPlan = typeof userPlans.$inferSelect;
 export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
 export type WebhookEvent = typeof webhookEvents.$inferSelect;
 
-export type WhatsappChipWithClient = WhatsappChip & {
-  client?: Client;
-};
-
 export type UserPlanWithDetails = UserPlan & {
   user: User;
   plan: Plan;

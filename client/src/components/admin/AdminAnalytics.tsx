@@ -11,6 +11,8 @@ export default function AdminAnalytics() {
     queryKey: ["/api/admin/metrics"],
   });
 
+  const typedMetrics = metrics as any;
+
   if (isLoading) {
     return <div>Loading analytics...</div>;
   }
@@ -18,42 +20,42 @@ export default function AdminAnalytics() {
   const kpiCards = [
     {
       title: "Total Users",
-      value: metrics.totalUsers || 0,
+      value: typedMetrics.totalUsers || 0,
       icon: Users,
       description: "Active platform users",
       change: "+12%",
     },
     {
       title: "Active Plans",
-      value: metrics.totalPlans || 0,
+      value: typedMetrics.totalPlans || 0,
       icon: CreditCard,
       description: "Available subscription plans",
       change: "+3%",
     },
     {
       title: "Webhooks",
-      value: metrics.totalWebhooks || 0,
+      value: typedMetrics.totalWebhooks || 0,
       icon: Globe,
       description: "Configured webhook endpoints",
       change: "+5%",
     },
     {
       title: "WhatsApp Chips",
-      value: metrics.totalChips || 0,
+      value: typedMetrics.totalChips || 0,
       icon: Smartphone,
       description: "Total WhatsApp chips",
       change: "+8%",
     },
     {
       title: "Active Chips",
-      value: metrics.activeChips || 0,
+      value: typedMetrics.activeChips || 0,
       icon: TrendingUp,
       description: "Currently active chips",
       change: "+15%",
     },
     {
       title: "Total Sales Value",
-      value: `$${(metrics.totalSalesValue || 0).toLocaleString()}`,
+      value: `$${(typedMetrics.totalSalesValue || 0).toLocaleString()}`,
       icon: DollarSign,
       description: "Total platform sales",
       change: "+23%",
@@ -61,9 +63,9 @@ export default function AdminAnalytics() {
   ];
 
   const chipStatusData = [
-    { name: "Active", value: metrics.activeChips || 0, color: COLORS[0] },
-    { name: "Recovery", value: metrics.recoveryChips || 0, color: COLORS[1] },
-    { name: "Inactive", value: (metrics.totalChips || 0) - (metrics.activeChips || 0) - (metrics.recoveryChips || 0), color: COLORS[2] },
+    { name: "Active", value: typedMetrics.activeChips || 0, color: COLORS[0] },
+    { name: "Recovery", value: typedMetrics.recoveryChips || 0, color: COLORS[1] },
+    { name: "Inactive", value: (typedMetrics.totalChips || 0) - (typedMetrics.activeChips || 0) - (typedMetrics.recoveryChips || 0), color: COLORS[2] },
   ];
 
   const salesData = [
@@ -169,14 +171,14 @@ export default function AdminAnalytics() {
             <div className="flex justify-between items-center">
               <span className="text-sm">Recovery Rate</span>
               <Badge variant="default">
-                {metrics.totalSalesValue > 0 
-                  ? Math.round((metrics.totalRecoveredValue / metrics.totalSalesValue) * 100) 
+                {typedMetrics.totalSalesValue > 0 
+                  ? Math.round((typedMetrics.totalRecoveredValue / typedMetrics.totalSalesValue) * 100) 
                   : 0}%
               </Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Active Webhooks</span>
-              <Badge variant="secondary">{metrics.totalWebhooks || 0}</Badge>
+              <Badge variant="secondary">{typedMetrics.totalWebhooks || 0}</Badge>
             </div>
           </CardContent>
         </Card>
