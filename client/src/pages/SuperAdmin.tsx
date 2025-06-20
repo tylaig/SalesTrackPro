@@ -37,9 +37,9 @@ export default function SuperAdmin() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-surface shadow-sm border-b border-gray-200 px-6 py-4">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Shield className="text-red-600 h-8 w-8" />
@@ -57,9 +57,9 @@ export default function SuperAdmin() {
       </header>
 
       {/* Content */}
-      <div className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
+      <div className="p-6 min-h-[calc(100vh-120px)]">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span>Visão Geral</span>
@@ -86,9 +86,9 @@ export default function SuperAdmin() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="space-y-6 w-full">
             {/* KPIs Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
               <Card className="shadow-sm border border-gray-100">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -233,23 +233,23 @@ export default function SuperAdmin() {
             </div>
           </TabsContent>
 
-          <TabsContent value="users">
+          <TabsContent value="users" className="w-full">
             <UsersManagement />
           </TabsContent>
 
-          <TabsContent value="plans">
+          <TabsContent value="plans" className="w-full">
             <PlansManagement />
           </TabsContent>
 
-          <TabsContent value="webhooks">
+          <TabsContent value="webhooks" className="w-full">
             <WebhooksManagement />
           </TabsContent>
 
-          <TabsContent value="chips">
+          <TabsContent value="chips" className="w-full">
             <WhatsappChipsManagement />
           </TabsContent>
 
-          <TabsContent value="analytics">
+          <TabsContent value="analytics" className="w-full">
             <AdminAnalytics />
           </TabsContent>
         </Tabs>
