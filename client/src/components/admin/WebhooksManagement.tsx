@@ -284,7 +284,7 @@ export default function WebhooksManagement() {
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {JSON.parse(webhook.events || "[]").map((event: string, index: number) => (
+                    {(webhook.events && webhook.events.length > 0 ? webhook.events : []).map((event: any, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {event}
                       </Badge>

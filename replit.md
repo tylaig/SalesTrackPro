@@ -109,6 +109,14 @@ The application follows a monorepo pattern with shared types and schemas:
 
 ## Recent Updates
 
+### Webhook System Fix and Documentation (June 20, 2025)
+- Fixed webhook events parsing error in WebhooksManagement component
+- Added comprehensive webhook documentation with payload examples
+- Created WebhookDocumentation component with complete API specifications
+- Added payload examples for payment_pending, payment_approved, and payment_failed events
+- Included implementation examples for Node.js/Express and cURL testing
+- Enhanced Super Admin webhooks page with side-by-side management and documentation
+
 ### Data Cleanup and Support System Redesign (June 20, 2025)
 - Removed all support ticket creation forms (clients submit externally, not through internal system)
 - Cleaned all mock data from PostgreSQL database (sales, clients, support_tickets tables)
@@ -116,6 +124,7 @@ The application follows a monorepo pattern with shared types and schemas:
 - Enhanced Dashboard with proper empty state handling when no real data exists
 - Added informative empty states for charts, KPIs, and tables
 - Dashboard now only shows metrics when actual data exists (no more mock values)
+- Added 6 test clients with 6 sales of R$ 25,00 each (3 realized, 2 recovered, 1 lost)
 
 ### Super Admin System Implementation (June 20, 2025)
 - Implemented comprehensive Super Admin dashboard with advanced capabilities

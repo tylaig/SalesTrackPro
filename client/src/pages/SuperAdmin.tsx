@@ -18,6 +18,7 @@ import {
 import UsersManagement from "@/components/admin/UsersManagement";
 import PlansManagement from "@/components/admin/PlansManagement";
 import WebhooksManagement from "@/components/admin/WebhooksManagement";
+import WebhookDocumentation from "@/components/admin/WebhookDocumentation";
 import WhatsappChipsManagement from "@/components/admin/WhatsappChipsManagement";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
