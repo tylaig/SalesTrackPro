@@ -17,6 +17,7 @@ services:
       # Configuração do Node.js
       - NODE_ENV=production
       - PORT=5000
+      - __dirname=/app
       
       # Configuração de Sessão
       - SESSION_SECRET=your-super-secret-session-key-change-this-in-production
