@@ -420,7 +420,15 @@ export class DatabaseStorage implements IStorage {
   // Webhook Processing
   async processWebhookEvent(eventData: any): Promise<{ success: boolean; message: string; }> {
     try {
+      console.log('Processing webhook event data:', JSON.stringify(eventData, null, 2));
+      
       const { event, customer, sale_id, payment_method, total_price, products, utm } = eventData;
+      
+      if (!customer || !customer.phone_number) {
+        console.error('Customer or phone_number missing:', { customer });
+        return { success: false, message: 'Dados do cliente inválidos - telefone obrigatório' };
+      }
+      
       const phone = customer.phone_number;
       
       // Normalize phone number (remove any formatting)

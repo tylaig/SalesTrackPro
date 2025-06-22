@@ -304,170 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Webhook receiver endpoint for sales and clients
-  app.post("/api/webhook/sales", async (req, res) => {
-    try {
-      const payload = req.body;
-      console.log("Webhook received:", payload);
-
-      // Normalize phone number (remove spaces, parentheses, dashes)
-      const normalizePhone = (phone: string) => {
-        return phone.replace(/[\s\(\)\-]/g, '');
-      };
-
-      const clientPhone = normalizePhone(payload.client.phone);
-
-      // Find client by phone (unique identifier)
-      let client = await storage.getClients().then(clients => 
-        clients.find(c => normalizePhone(c.phone) === clientPhone)
-      );
-
-      // Create client if doesn't exist
-      if (!client) {
-        client = await storage.createClient({
-          name: payload.client.name,
-          email: payload.client.email || '',
-          phone: payload.client.phone,
-          company: payload.client.company || ''
-        });
-      }
-
-      // Get client's event history to determine recovery status
-      const clientEvents = await storage.getClientEvents(client.id);
-      let sale: any = null;
-
-      switch (payload.event_type) {
-        case 'payment_pending':
-          // Create pending sale
-          sale = await storage.createSale({
-            clientId: client.id,
-            product: payload.product,
-            value: payload.value,
-            status: 'pending',
-            date: new Date(payload.timestamp),
-            notes: `${payload.payment_method} - ${payload.transaction_id}`
-          });
-
-          // Log event
-          await storage.createClientEvent({
-            clientId: client.id,
-            eventType: 'payment_pending',
-            transactionId: payload.transaction_id,
-            saleId: sale.id,
-            product: payload.product,
-            value: payload.value,
-            paymentMethod: payload.payment_method,
-            metadata: { expires_at: payload.expires_at }
-          });
-          break;
-
-        case 'payment_completed':
-          // Find pending sale and update to realized OR check if should be recovery
-          const sales = await storage.getSales();
-          const pendingSale = sales.find(s => 
-            s.clientId === client.id && 
-            s.status === 'pending' &&
-            s.notes?.includes(payload.transaction_id)
-          );
-
-          // Check if client has previous lost sales (for automatic recovery detection)
-          const hasLostSales = clientEvents.some(e => e.eventType === 'payment_failed');
-          const isRecovery = hasLostSales && !pendingSale; // New purchase after previous loss
-
-          let status = 'realized';
-          if (isRecovery) status = 'recovered';
-
-          if (pendingSale) {
-            await storage.updateSale(pendingSale.id, {
-              status: status,
-              notes: `${pendingSale.notes} - Pago em ${new Date(payload.timestamp).toLocaleString()}`
-            });
-            sale = pendingSale;
-          } else {
-            // Create new sale
-            sale = await storage.createSale({
-              clientId: client.id,
-              product: payload.product,
-              value: payload.value,
-              status: status,
-              date: new Date(payload.timestamp),
-              notes: `${payload.payment_method} - ${payload.transaction_id} - ${isRecovery ? 'Recuperação automática' : 'Direto'}`
-            });
-          }
-
-          // Log event
-          await storage.createClientEvent({
-            clientId: client.id,
-            eventType: 'payment_completed',
-            transactionId: payload.transaction_id,
-            saleId: sale.id,
-            product: payload.product,
-            value: payload.value,
-            paymentMethod: payload.payment_method,
-            metadata: { recovery_detected: isRecovery }
-          });
-          break;
-
-        case 'payment_failed':
-          // Find pending sale and update to lost
-          const allSales = await storage.getSales();
-          const expiredSale = allSales.find(s => 
-            s.clientId === client.id && 
-            s.status === 'pending' &&
-            s.notes?.includes(payload.transaction_id)
-          );
-
-          if (expiredSale) {
-            await storage.updateSale(expiredSale.id, {
-              status: 'lost',
-              notes: `${expiredSale.notes} - Expirado/Falhado em ${new Date(payload.timestamp).toLocaleString()}`
-            });
-
-            // Log event
-            await storage.createClientEvent({
-              clientId: client.id,
-              eventType: 'payment_failed',
-              transactionId: payload.transaction_id,
-              saleId: expiredSale.id,
-              product: payload.product,
-              value: payload.value,
-              paymentMethod: payload.payment_method,
-              metadata: { reason: payload.reason }
-            });
-          }
-          break;
-
-        case 'recovery_purchase':
-          // Explicit recovery purchase (manual or identified)
-          sale = await storage.createSale({
-            clientId: client.id,
-            product: payload.product,
-            value: payload.value,
-            status: 'recovered',
-            date: new Date(payload.timestamp),
-            notes: `${payload.payment_method} - ${payload.transaction_id} - Recuperação manual`
-          });
-
-          // Log event
-          await storage.createClientEvent({
-            clientId: client.id,
-            eventType: 'recovery_purchase',
-            transactionId: payload.transaction_id,
-            saleId: sale.id,
-            product: payload.product,
-            value: payload.value,
-            paymentMethod: payload.payment_method,
-            metadata: { original_transaction: payload.original_transaction }
-          });
-          break;
-      }
-
-      res.status(200).json({ received: true, client_id: client.id, sale_id: sale?.id });
-    } catch (error) {
-      console.error("Error processing webhook:", error);
-      res.status(500).json({ message: "Failed to process webhook" });
-    }
-  });
+  // Old webhook completely removed to avoid conflicts
 
   // WhatsApp chips management
   app.get("/api/admin/whatsapp-chips", async (req, res) => {
@@ -830,6 +667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate required fields
       if (!eventData || !eventData.event || !eventData.customer || !eventData.customer.phone_number) {
+        console.error('Validation failed:', { eventData });
         return res.status(400).json({ 
           success: false, 
           message: 'Dados do webhook inválidos: evento, cliente ou telefone faltando' 
@@ -849,7 +687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error processing webhook:', error);
       res.status(500).json({ 
         success: false, 
-        message: 'Erro interno do servidor ao processar webhook' 
+        message: 'Failed to process webhook' 
       });
     }
   });
