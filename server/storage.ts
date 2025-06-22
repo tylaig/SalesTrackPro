@@ -416,6 +416,125 @@ export class DatabaseStorage implements IStorage {
     const events = await this.getClientEvents(clientId);
     return { ...client, events };
   }
+
+  // Webhook Processing
+  async processWebhookEvent(eventData: any): Promise<{ success: boolean; message: string; }> {
+    try {
+      const { event, customer, sale_id, payment_method, total_price, products, utm } = eventData;
+      const phone = customer.phone_number;
+      
+      // Normalize phone number (remove any formatting)
+      const normalizedPhone = phone.replace(/\D/g, '');
+      
+      // Find or create client
+      let client = await this.getClientByPhone(normalizedPhone);
+      if (!client) {
+        client = await this.createClient({
+          name: customer.name,
+          email: customer.email || null,
+          phone: normalizedPhone,
+        });
+      }
+
+      // Parse price to decimal
+      const priceString = total_price.replace(/[^\d,]/g, '').replace(',', '.');
+      const price = parseFloat(priceString);
+
+      // Get product name
+      const productName = products[0]?.name || 'Produto não especificado';
+
+      switch (event) {
+        case 'PIX_GENERATED':
+          // Create pending sale
+          await this.createSale({
+            clientId: client.id,
+            saleId: sale_id,
+            product: productName,
+            value: price.toString(),
+            status: 'pending',
+            paymentMethod: payment_method,
+            eventType: event,
+            utmCampaign: utm?.utm_campaign || null,
+            utmMedium: utm?.utm_medium || null,
+            utmContent: utm?.utm_content || null,
+            originalPrice: total_price,
+          });
+          return { success: true, message: 'PIX gerado registrado com sucesso' };
+
+        case 'SALE_APPROVED':
+          // Check if client has previous abandoned cart or pending PIX
+          const previousSales = await db.select().from(sales)
+            .where(eq(sales.clientId, client.id))
+            .orderBy(desc(sales.date));
+
+          let status = 'realized';
+          let message = 'Venda aprovada registrada';
+
+          // Check if this is a recovery
+          const hasAbandonedCart = previousSales.some(sale => 
+            sale.eventType === 'ABANDONED_CART' || sale.status === 'lost'
+          );
+          const hasPendingPix = previousSales.some(sale => 
+            sale.eventType === 'PIX_GENERATED' && sale.status === 'pending'
+          );
+
+          if (hasAbandonedCart || hasPendingPix) {
+            status = 'recovered';
+            message = 'Venda recuperada registrada com sucesso';
+          }
+
+          // Update pending PIX if exists
+          if (hasPendingPix) {
+            await db.update(sales)
+              .set({ status: 'recovered', eventType: event, saleId: sale_id })
+              .where(and(
+                eq(sales.clientId, client.id),
+                eq(sales.status, 'pending')
+              ));
+          } else {
+            // Create new sale
+            await this.createSale({
+              clientId: client.id,
+              saleId: sale_id,
+              product: productName,
+              value: price.toString(),
+              status,
+              paymentMethod: payment_method,
+              eventType: event,
+              utmCampaign: utm?.utm_campaign || null,
+              utmMedium: utm?.utm_medium || null,
+              utmContent: utm?.utm_content || null,
+              originalPrice: total_price,
+            });
+          }
+
+          return { success: true, message };
+
+        case 'ABANDONED_CART':
+          // Create lost sale
+          await this.createSale({
+            clientId: client.id,
+            saleId: sale_id || null,
+            product: productName,
+            value: price.toString(),
+            status: 'lost',
+            paymentMethod: payment_method || null,
+            eventType: event,
+            utmCampaign: utm?.utm_campaign || null,
+            utmMedium: utm?.utm_medium || null,
+            utmContent: utm?.utm_content || null,
+            originalPrice: total_price,
+          });
+          return { success: true, message: 'Carrinho abandonado registrado' };
+
+        default:
+          return { success: false, message: 'Tipo de evento não reconhecido' };
+      }
+    } catch (error) {
+      console.error('Error processing webhook event:', error);
+      return { success: false, message: 'Erro ao processar evento do webhook' };
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

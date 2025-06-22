@@ -31,6 +31,7 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
           <Route path="/clients" component={Clients} />
           <Route path="/reports" component={Reports} />
           <Route path="/super-admin" component={SuperAdmin} />
+          <Route path="/webhook-test" component={WebhookTest} />
           <Route component={NotFound} />
         </Switch>
       </main>

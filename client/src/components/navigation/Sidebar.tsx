@@ -7,7 +7,8 @@ import {
   FileText,
   UserCircle,
   LogOut,
-  Shield
+  Shield,
+  Webhook
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ const navigation = [
   { name: "Suporte", href: "/support", icon: Headphones },
   { name: "Relatórios", href: "/reports", icon: FileText },
   { name: "Super Admin", href: "/super-admin", icon: Shield },
+  { name: "Teste Webhook", href: "/webhook-test", icon: Webhook },
 ];
 
 interface SidebarProps {
