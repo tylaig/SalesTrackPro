@@ -13,7 +13,9 @@ import {
   Settings,
   Database,
   BarChart3,
-  Activity
+  Activity,
+  Trash2,
+  AlertTriangle
 } from "lucide-react";
 import UsersManagement from "@/components/admin/UsersManagement";
 import SuperAdminDashboard from "@/components/admin/SuperAdminDashboard";
