@@ -30,12 +30,86 @@ export default function Reports() {
       description: "PDF sendo gerado e baixado...",
     });
     
+    // Criar conteúdo HTML do relatório
+    const reportContent = `
+      <html>
+        <head>
+          <title>Relatório de Vendas</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .kpi { display: flex; justify-content: space-between; margin: 20px 0; }
+            .kpi-item { text-align: center; padding: 10px; border: 1px solid #ccc; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Relatório de Vendas</h1>
+            <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')}</p>
+          </div>
+          
+          <div class="kpi">
+            <div class="kpi-item">
+              <h3>Total de Vendas</h3>
+              <p>R$ ${metrics?.totalSales?.toLocaleString('pt-BR') || '0,00'}</p>
+            </div>
+            <div class="kpi-item">
+              <h3>Vendas Recuperadas</h3>
+              <p>R$ ${metrics?.recoveredSales?.toLocaleString('pt-BR') || '0,00'}</p>
+            </div>
+            <div class="kpi-item">
+              <h3>Vendas Perdidas</h3>
+              <p>R$ ${metrics?.lostSales?.toLocaleString('pt-BR') || '0,00'}</p>
+            </div>
+            <div class="kpi-item">
+              <h3>Total de Clientes</h3>
+              <p>${metrics?.totalClients || 0}</p>
+            </div>
+          </div>
+          
+          <h2>Performance</h2>
+          <table>
+            <tr>
+              <th>Métrica</th>
+              <th>Valor</th>
+            </tr>
+            <tr>
+              <td>Taxa de Conversão</td>
+              <td>${metrics ? ((metrics.totalSales - metrics.lostSales) / metrics.totalSales * 100).toFixed(1) : 0}%</td>
+            </tr>
+            <tr>
+              <td>Taxa de Recuperação</td>
+              <td>${metrics ? (metrics.recoveredSales / (metrics.recoveredSales + metrics.lostSales) * 100).toFixed(1) : 0}%</td>
+            </tr>
+            <tr>
+              <td>Valor Médio por Venda</td>
+              <td>R$ ${metrics ? (metrics.totalSales / Math.max(metrics.totalClients, 1)).toFixed(2) : '0,00'}</td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+    
+    // Criar e baixar arquivo HTML como PDF
     setTimeout(() => {
+      const blob = new Blob([reportContent], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `relatorio-vendas-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
       toast({
-        title: "Relatório Exportado",
-        description: "PDF baixado com sucesso",
+        title: "Relatório Baixado",
+        description: "Arquivo HTML baixado com sucesso. Abra no navegador e use Ctrl+P para gerar PDF.",
       });
-    }, 2000);
+    }, 1500);
   };
 
   if (metricsLoading || chartLoading) {
