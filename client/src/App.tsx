@@ -16,7 +16,7 @@ import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/navigation/Sidebar";
 
 function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boolean; onLogout: () => void; onLogin: (success: boolean) => void }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   if (!isAuthenticated) {
     return <Login onLogin={onLogin} />;
