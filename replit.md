@@ -109,6 +109,16 @@ The application follows a monorepo pattern with shared types and schemas:
 
 ## Recent Updates
 
+### Dashboard Growth Indicators Fix (June 22, 2025)
+- Fixed hardcoded growth percentages (+12.5%, +8.3%, etc.) in Dashboard KPI cards
+- Implemented realistic growth calculation: returns 0% for first day of system operation
+- Added formatPercent() function that shows "Primeiro dia" when growth = 0
+- Updated KPICards.tsx interface to include salesGrowth, recoveryGrowth, lossGrowth, clientGrowth
+- Backend now calculates growth comparing last 30 days vs previous 30 days
+- For new systems without historical data, shows "Primeiro dia" instead of misleading percentages
+
+## Recent Updates
+
 ### Security and Authentication System (June 22, 2025)
 - Removed demo credentials from login screen (no more auto-filled admin@dashboard.com)
 - Implemented mandatory password change system for first-time users
