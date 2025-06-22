@@ -7,6 +7,10 @@ interface KPICardsProps {
     recoveredSales: number;
     lostSales: number;
     totalClients: number;
+    salesGrowth: number;
+    recoveryGrowth: number;
+    lossGrowth: number;
+    clientGrowth: number;
   };
 }
 
@@ -18,46 +22,54 @@ export default function KPICards({ metrics }: KPICardsProps) {
     }).format(value);
   };
 
+  const formatPercent = (value: number) => {
+    if (value === 0) {
+      return 'Primeiro dia';
+    }
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${value.toFixed(1)}%`;
+  };
+
   const cards = [
     {
       title: "Vendas Realizadas",
       value: formatCurrency(metrics.totalSales),
-      growth: "+12.5%",
+      growth: formatPercent(metrics.salesGrowth),
       growthText: "vs mês anterior",
       icon: CheckCircle,
       iconBg: "bg-green-100",
       iconColor: "text-green-600",
-      growthColor: "text-green-600"
+      growthColor: metrics.salesGrowth >= 0 ? "text-green-600" : "text-red-600"
     },
     {
       title: "Vendas Recuperadas",
       value: formatCurrency(metrics.recoveredSales),
-      growth: "+8.3%",
+      growth: formatPercent(metrics.recoveryGrowth),
       growthText: "vs mês anterior",
       icon: RotateCcw,
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600",
-      growthColor: "text-green-600"
+      growthColor: metrics.recoveryGrowth >= 0 ? "text-green-600" : "text-red-600"
     },
     {
       title: "Vendas Perdidas",
       value: formatCurrency(metrics.lostSales),
-      growth: "-2.1%",
+      growth: formatPercent(metrics.lossGrowth),
       growthText: "vs mês anterior",
       icon: XCircle,
       iconBg: "bg-red-100",
       iconColor: "text-red-600",
-      growthColor: "text-red-600"
+      growthColor: metrics.lossGrowth <= 0 ? "text-green-600" : "text-red-600"
     },
     {
       title: "Total de Clientes",
       value: metrics.totalClients.toString(),
-      growth: "+5.2%",
+      growth: formatPercent(metrics.clientGrowth),
       growthText: "novos clientes",
       icon: Users,
       iconBg: "bg-purple-100",
       iconColor: "text-purple-600",
-      growthColor: "text-green-600"
+      growthColor: metrics.clientGrowth >= 0 ? "text-green-600" : "text-red-600"
     }
   ];
 
