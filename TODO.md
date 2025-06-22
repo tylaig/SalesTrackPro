@@ -59,6 +59,13 @@
 - [x] Corrigir nome hardcoded "João Silva" na barra lateral (FINALMENTE!)
 - [x] Testar lógica de recuperação com webhook real
 
+## 10. IMPLEMENTAÇÃO DE HISTÓRICO DE EVENTOS DE CLIENTES
+- [x] Adicionar criação de eventos de cliente em todos os webhooks processados
+- [x] Salvar eventos PIX_GENERATED, SALE_APPROVED e ABANDONED_CART
+- [x] Incluir metadados completos (UTM, preços, tipo de recuperação)
+- [x] Testar histórico de eventos com webhook real
+- [x] Adicionar logs de debug no componente ClientEventHistory
+
 ## Status: SISTEMA COMPLETO E FUNCIONAL ✅
 Data: 22/06/2025
 

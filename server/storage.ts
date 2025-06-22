@@ -500,6 +500,21 @@ export class DatabaseStorage implements IStorage {
             utmContent: utm?.utm_content || null,
             originalPrice: total_price,
           });
+
+          // Save client event
+          await this.createClientEvent({
+            clientId: client.id,
+            eventType: 'PIX_GENERATED',
+            transactionId: sale_id || 'N/A',
+            product: productName,
+            value: price,
+            paymentMethod: payment_method || 'N/A',
+            metadata: {
+              utm: utm,
+              originalPrice: total_price
+            }
+          });
+
           return { success: true, message: 'PIX gerado registrado com sucesso' };
 
         case 'SALE_APPROVED':
@@ -557,6 +572,21 @@ export class DatabaseStorage implements IStorage {
             message = 'Nova venda registrada com sucesso';
           }
 
+          // Save client event for SALE_APPROVED
+          await this.createClientEvent({
+            clientId: client.id,
+            eventType: 'SALE_APPROVED',
+            transactionId: sale_id || 'N/A',
+            product: productName,
+            value: price,
+            paymentMethod: payment_method || 'N/A',
+            metadata: {
+              utm: utm,
+              originalPrice: total_price,
+              recoveryType: lostSales.length > 0 ? 'recovered' : (pendingSales.length > 0 ? 'pix_approved' : 'new_sale')
+            }
+          });
+
           return { success: true, message };
 
         case 'ABANDONED_CART':
@@ -574,6 +604,20 @@ export class DatabaseStorage implements IStorage {
             utmContent: utm?.utm_content || null,
             originalPrice: total_price,
           });
+          // Save client event for ABANDONED_CART
+          await this.createClientEvent({
+            clientId: client.id,
+            eventType: 'ABANDONED_CART',
+            transactionId: sale_id || 'N/A',
+            product: productName,
+            value: price,
+            paymentMethod: payment_method || 'N/A',
+            metadata: {
+              utm: utm,
+              originalPrice: total_price
+            }
+          });
+
           return { success: true, message: 'Carrinho abandonado registrado' };
 
         default:
