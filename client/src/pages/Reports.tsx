@@ -8,6 +8,9 @@ import SalesDistributionChart from "@/components/charts/SalesDistributionChart";
 import type { SaleWithClient } from "@shared/schema";
 
 export default function Reports() {
+  const [dateFilter, setDateFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const { toast } = useToast();
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ["/api/sales/metrics"],
     retry: false,

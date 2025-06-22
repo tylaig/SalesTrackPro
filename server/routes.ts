@@ -408,6 +408,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear all data endpoint for Super Admin
+  app.post("/api/admin/clear-data", async (req, res) => {
+    try {
+      // Delete all sales first (due to foreign key constraints)
+      await storage.clearAllSales();
+      // Delete all clients
+      await storage.clearAllClients();
+      
+      res.json({ 
+        success: true, 
+        message: "Todos os dados foram limpos com sucesso" 
+      });
+    } catch (error) {
+      console.error("Error clearing data:", error);
+      res.status(500).json({ message: "Failed to clear data" });
+    }
+  });
+
   // Super Admin Routes
   app.get("/api/admin/users", async (req, res) => {
     try {

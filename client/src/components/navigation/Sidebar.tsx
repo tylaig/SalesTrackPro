@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   TrendingUp, 
@@ -7,7 +8,8 @@ import {
   UserCircle,
   LogOut,
   Shield,
-  Webhook
+  Menu,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,7 +20,6 @@ const navigation = [
   { name: "Clientes", href: "/clients", icon: Users },
   { name: "Relatórios", href: "/reports", icon: FileText },
   { name: "Super Admin", href: "/super-admin", icon: Shield },
-  { name: "Teste Webhook", href: "/webhook-test", icon: Webhook },
 ];
 
 interface SidebarProps {
@@ -27,15 +28,28 @@ interface SidebarProps {
 
 export default function Sidebar({ onLogout }: SidebarProps) {
   const [location] = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <aside className="w-64 bg-surface shadow-lg h-screen sticky top-0 overflow-y-auto">
-      <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-semibold text-gray-800 flex items-center">
-          <TrendingUp className="text-primary mr-2 h-6 w-6" />
-          Dashboard Vendas
-        </h1>
-      </div>
+    <>
+      {/* Mobile toggle button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="fixed top-4 left-4 z-50 md:hidden"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
+        {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+      </Button>
+
+      {/* Sidebar */}
+      <aside className={`${isCollapsed ? 'hidden' : 'block'} md:block w-64 bg-surface shadow-lg h-screen fixed md:relative z-40 overflow-y-auto`}>
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-xl font-semibold text-gray-800 flex items-center">
+            <TrendingUp className="text-primary mr-2 h-6 w-6" />
+            Dashboard Vendas
+          </h1>
+        </div>
       
       <nav className="mt-6">
         <div className="px-6 mb-6">
@@ -85,5 +99,14 @@ export default function Sidebar({ onLogout }: SidebarProps) {
         )}
       </nav>
     </aside>
+    
+    {/* Overlay for mobile */}
+    {!isCollapsed && (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+        onClick={() => setIsCollapsed(true)}
+      />
+    )}
+  </>
   );
 }

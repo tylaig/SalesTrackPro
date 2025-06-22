@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -18,6 +19,7 @@ const COLORS = {
 const DISTRIBUTION_COLORS = ['#4CAF50', '#1976D2', '#F44336'];
 
 export default function ChartsSection({ chartData }: ChartsSectionProps) {
+  const [period, setPeriod] = useState('monthly');
   const distributionData = chartData.distribution.map(item => ({
     name: item.status === 'realized' ? 'Realizadas' : 
           item.status === 'recovered' ? 'Recuperadas' : 'Perdidas',
@@ -34,9 +36,30 @@ export default function ChartsSection({ chartData }: ChartsSectionProps) {
             Tendência de Vendas
           </CardTitle>
           <div className="flex space-x-2">
-            <Button size="sm" className="px-3 py-1 text-xs">Mensal</Button>
-            <Button size="sm" variant="outline" className="px-3 py-1 text-xs">Semanal</Button>
-            <Button size="sm" variant="outline" className="px-3 py-1 text-xs">Diário</Button>
+            <Button 
+              size="sm" 
+              variant={period === 'monthly' ? 'default' : 'outline'}
+              className="px-3 py-1 text-xs"
+              onClick={() => setPeriod('monthly')}
+            >
+              Mensal
+            </Button>
+            <Button 
+              size="sm" 
+              variant={period === 'weekly' ? 'default' : 'outline'}
+              className="px-3 py-1 text-xs"
+              onClick={() => setPeriod('weekly')}
+            >
+              Semanal
+            </Button>
+            <Button 
+              size="sm" 
+              variant={period === 'daily' ? 'default' : 'outline'}
+              className="px-3 py-1 text-xs"
+              onClick={() => setPeriod('daily')}
+            >
+              Diário
+            </Button>
           </div>
         </CardHeader>
         <CardContent>

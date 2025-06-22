@@ -9,6 +9,8 @@ import type { Client } from "@shared/schema";
 import ClientEventHistory from "@/components/client/ClientEventHistory";
 
 export default function Clients() {
+  const [searchTerm, setSearchTerm] = useState("");
+  
   const { data: clients = [], isLoading } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
     retry: false,
@@ -27,6 +29,53 @@ export default function Clients() {
       .slice(0, 2);
   };
 
+  // Filter clients based on search
+  const filteredClients = clients.filter((client: Client) => {
+    return (
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (client.company && client.company.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  });
+
+  const ClientEventHistory = ({ clientId }: { clientId: number }) => {
+    const { data: events = [], isLoading: eventsLoading } = useQuery({
+      queryKey: [`/api/clients/${clientId}/events`],
+    });
+
+    if (eventsLoading) return <div>Carregando eventos...</div>;
+
+    return (
+      <div className="space-y-3">
+        {events.length === 0 ? (
+          <p className="text-gray-500">Nenhum evento encontrado</p>
+        ) : (
+          events.map((event: any) => (
+            <div key={event.id} className="border rounded p-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <Badge variant={
+                    event.eventType === 'payment_completed' ? 'default' :
+                    event.eventType === 'payment_failed' ? 'destructive' :
+                    'secondary'
+                  }>
+                    {event.eventType}
+                  </Badge>
+                  <p className="text-sm mt-1">{event.product}</p>
+                  <p className="text-xs text-gray-500">R$ {event.value}</p>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {formatDate(event.createdAt)}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
+
   return (
     <div>
       {/* Header */}
@@ -34,12 +83,9 @@ export default function Clients() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-800">Clientes</h2>
-            <p className="text-sm text-gray-600">Gerencie seus clientes</p>
+            <p className="text-sm text-gray-600">Clientes criados via Webhook</p>
           </div>
-          <Button className="bg-primary text-white hover:bg-blue-700">
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Cliente
-          </Button>
+
         </div>
       </header>
 
@@ -89,7 +135,7 @@ export default function Clients() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {clients.map((client) => (
+                    {filteredClients.map((client) => (
                       <TableRow key={client.id} className="hover:bg-gray-50">
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center">

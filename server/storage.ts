@@ -74,6 +74,10 @@ export interface IStorage {
 
   // Webhook Processing
   processWebhookEvent(eventData: any): Promise<{ success: boolean; message: string; }>;
+
+  // Data Clearing
+  clearAllSales(): Promise<void>;
+  clearAllClients(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -542,6 +546,14 @@ export class DatabaseStorage implements IStorage {
       console.error('Error processing webhook event:', error);
       return { success: false, message: 'Erro ao processar evento do webhook' };
     }
+  }
+
+  async clearAllSales(): Promise<void> {
+    await db.delete(sales);
+  }
+
+  async clearAllClients(): Promise<void> {
+    await db.delete(clients);
   }
 }
 
