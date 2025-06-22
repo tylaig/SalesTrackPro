@@ -24,7 +24,7 @@ export default function KPICards({ metrics }: KPICardsProps) {
 
   const formatPercent = (value: number) => {
     if (value === 0) {
-      return 'Primeiro dia';
+      return 'Sem dados históricos';
     }
     const sign = value >= 0 ? '+' : '';
     return `${sign}${value.toFixed(1)}%`;
