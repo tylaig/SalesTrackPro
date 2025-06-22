@@ -11,6 +11,79 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication routes FIRST
+  app.post('/api/login', async (req, res) => {
+    try {
+      console.log('Login attempt:', req.body);
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        console.log('Missing email or password');
+        return res.status(400).json({ message: 'Email e senha são obrigatórios' });
+      }
+
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      console.log('User found:', user ? 'Yes' : 'No');
+      
+      if (!user) {
+        console.log('User not found for email:', email);
+        return res.status(401).json({ message: 'Email ou senha inválidos' });
+      }
+
+      // Check if user is active (note: using isActive not is_active)
+      if (!user.isActive) {
+        console.log('User is not active:', email);
+        return res.status(401).json({ message: 'Usuário desativado' });
+      }
+
+      // For now, just check password directly (in production, use proper hashing)
+      console.log('Password check:', user.password === password ? 'Match' : 'No match');
+      if (user.password !== password) {
+        return res.status(401).json({ message: 'Email ou senha inválidos' });
+      }
+
+      // Store user in session
+      (req as any).session.user = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      };
+
+      console.log('Login successful for:', email);
+      res.json({ 
+        success: true, 
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  app.post('/api/logout', (req, res) => {
+    (req as any).session.destroy((err: any) => {
+      if (err) {
+        return res.status(500).json({ message: 'Erro ao fazer logout' });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  app.get('/api/auth/user', (req, res) => {
+    if ((req as any).session.user) {
+      res.json((req as any).session.user);
+    } else {
+      res.status(401).json({ message: 'Não autenticado' });
+    }
+  });
+
   // Sales metrics and charts FIRST - before parameterized routes
   app.get("/api/sales/metrics", async (req, res) => {
     try {
@@ -695,6 +768,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch admin metrics" });
     }
   });
+
+
 
   // Webhook endpoint for sales events
   app.post("/api/webhook/sales", async (req, res) => {
