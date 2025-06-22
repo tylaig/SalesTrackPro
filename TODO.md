@@ -45,6 +45,11 @@
 - [x] Verificar todas as rotas admin protegidas
 - [x] Testar exclusão de usuários e outras operações admin
 
+## 8. CORREÇÃO DE EXIBIÇÃO DE DADOS DO USUÁRIO
+- [x] Corrigir nome hardcoded "João da Silva" na barra lateral
+- [x] Exibir nome real do usuário logado (user.name)
+- [x] Exibir role correto (Administrador/Usuário) baseado no user.role
+
 ## Status: SISTEMA COMPLETO E FUNCIONAL ✅
 Data: 22/06/2025
 
