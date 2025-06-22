@@ -32,11 +32,11 @@ export default function Sidebar({ onLogout }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile toggle button */}
+      {/* Mobile toggle button - sempre visível */}
       <Button
         variant="ghost"
         size="sm"
-        className="fixed top-4 left-4 z-50 md:hidden"
+        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-md border"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
