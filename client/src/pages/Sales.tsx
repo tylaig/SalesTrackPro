@@ -61,7 +61,7 @@ export default function Sales() {
         sale.id,
         sale.client.name,
         sale.product,
-        `R$ ${sale.value.toFixed(2)}`,
+        `R$ ${Number(sale.value).toFixed(2)}`,
         sale.status,
         formatDate(sale.date)
       ])
@@ -214,7 +214,7 @@ export default function Sales() {
                         {sale.product}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        R$ {sale.value.toFixed(2)}
+                        R$ {Number(sale.value).toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(sale.status)}

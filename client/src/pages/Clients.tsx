@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, Filter, Mail, Phone, Building, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
