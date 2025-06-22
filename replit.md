@@ -109,6 +109,20 @@ The application follows a monorepo pattern with shared types and schemas:
 
 ## Recent Updates
 
+### Security and Authentication System (June 22, 2025)
+- Removed demo credentials from login screen (no more auto-filled admin@dashboard.com)
+- Implemented mandatory password change system for first-time users
+- Created ChangePasswordDialog component with proper validation
+- Added PUT /api/change-password endpoint with security checks
+- Implemented role-based access control throughout the application
+- Protected all /api/admin/* routes with requireAdmin middleware
+- Hidden Super Admin sidebar option for non-admin users
+- Added useAuth hook for centralized authentication state management
+- Updated App.tsx to use proper authentication flow with user data
+- Enhanced Sidebar component to show/hide admin options based on user role
+- All admin routes now require proper authentication and admin role verification
+- Password change is enforced before system access for users with temporary passwords
+
 ### Complete UI/UX Enhancement Phase 2 (June 22, 2025)
 - Implemented all 12 requested UI/UX improvements across the platform
 - Added functional period toggles (Daily/Weekly/Monthly) in Dashboard and Reports charts

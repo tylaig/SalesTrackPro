@@ -14,6 +14,7 @@ import WebhookTest from "@/pages/WebhookTest";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/navigation/Sidebar";
+import { useAuth } from "@/hooks/useAuth";
 
 function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boolean; onLogout: () => void; onLogin: (success: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);

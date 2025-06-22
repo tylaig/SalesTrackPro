@@ -8,9 +8,16 @@ interface SidebarProps {
   onLogout?: () => void;
   isOpen?: boolean;
   onClose?: () => void;
+  user?: {
+    id: number;
+    email: string;
+    name: string;
+    role: string;
+  } | null;
 }
 
-export default function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
+export default function Sidebar({ onLogout, isOpen = false, onClose, user }: SidebarProps) {
+  const isAdmin = user?.role === 'admin';
   const [location] = useLocation();
 
   return (
@@ -89,18 +96,20 @@ export default function Sidebar({ onLogout, isOpen = false, onClose }: SidebarPr
                 </Link>
               </li>
 
-              <li>
-                <Link href="/super-admin">
-                  <div className={`flex items-center px-4 py-3 text-sm rounded-lg transition-colors ${
-                    location === '/super-admin' 
-                      ? 'bg-red-50 text-red-700 border-l-4 border-red-500' 
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}>
-                    <Shield className="mr-3 h-5 w-5" />
-                    Super Admin
-                  </div>
-                </Link>
-              </li>
+              {isAdmin && (
+                <li>
+                  <Link href="/super-admin">
+                    <div className={`flex items-center px-4 py-3 text-sm rounded-lg transition-colors ${
+                      location === '/super-admin' 
+                        ? 'bg-red-50 text-red-700 border-l-4 border-red-500' 
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}>
+                      <Shield className="mr-3 h-5 w-5" />
+                      Super Admin
+                    </div>
+                  </Link>
+                </li>
+              )}
 
               <li>
                 <Link href="/webhook-test">

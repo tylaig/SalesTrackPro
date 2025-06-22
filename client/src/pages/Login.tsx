@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { TrendingUp, LogIn, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
+import ChangePasswordDialog from "@/components/auth/ChangePasswordDialog";
 
 const loginSchema = z.object({
   email: z.string().email("Email válido é obrigatório"),
@@ -18,12 +19,13 @@ const loginSchema = z.object({
 type LoginData = z.infer<typeof loginSchema>;
 
 interface LoginProps {
-  onLogin: (success: boolean) => void;
+  onLogin: (success: boolean, userData?: any) => void;
 }
 
 export default function Login({ onLogin }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<LoginData>({
@@ -50,20 +52,14 @@ export default function Login({ onLogin }: LoginProps) {
 
       if (response.ok && result.success) {
         if (result.requirePasswordChange) {
-          toast({
-            title: "Troca de senha obrigatória",
-            description: "Você precisa alterar sua senha temporária",
-            variant: "destructive",
-          });
-          // TODO: Implement password change flow
-          alert("Você precisa alterar sua senha temporária. Funcionalidade será implementada.");
+          setShowPasswordChange(true);
         } else {
           toast({
             title: "Login realizado com sucesso!",
             description: "Bem-vindo ao Dashboard de Vendas",
           });
+          onLogin(true, result.user);
         }
-        onLogin(true);
       } else {
         toast({
           title: "Erro no login",
@@ -162,15 +158,22 @@ export default function Login({ onLogin }: LoginProps) {
               </form>
             </Form>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-2">Credenciais de demonstração:</p>
-              <p className="text-xs text-gray-500">
-                <strong>Email:</strong> admin@dashboard.com<br />
-                <strong>Senha:</strong> admin123
-              </p>
-            </div>
+
           </CardContent>
         </Card>
+
+        <ChangePasswordDialog 
+          open={showPasswordChange}
+          isFirstLogin={true}
+          onSuccess={() => {
+            setShowPasswordChange(false);
+            toast({
+              title: "Login realizado com sucesso!",
+              description: "Bem-vindo ao Dashboard de Vendas",
+            });
+            onLogin(true, { id: 1, email: form.getValues().email, name: "User", role: "user" });
+          }}
+        />
       </div>
     </div>
   );

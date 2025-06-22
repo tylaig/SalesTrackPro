@@ -1,0 +1,43 @@
+# TODO - Sistema de Segurança e Autenticação
+
+## 1. Remover credenciais demo da tela de login
+- [x] Remover email e senha padrão do formulário de login
+- [x] Limpar placeholders que mostram credenciais demo
+- [x] Atualizar interface para não mostrar informações de teste
+
+## 2. Implementar mudança obrigatória de senha
+- [x] Criar componente ChangePasswordDialog
+- [x] Implementar endpoint PUT /api/change-password
+- [x] Detectar requirePasswordChange no login
+- [x] Forçar mudança de senha antes de acessar o sistema
+- [x] Atualizar banco de dados após mudança
+
+## 3. Proteger rotas Super Admin
+- [x] Verificar role do usuário logado
+- [x] Ocultar opção "Super Admin" do sidebar para usuários não-admin
+- [x] Implementar middleware de proteção no backend
+- [x] Redirecionar usuários não-admin que tentarem acessar /super-admin
+- [x] Proteger todas as rotas /api/admin/* no backend
+
+## 4. Testes e Validação
+- [x] Testar login com usuário normal (não deve ver Super Admin)
+- [x] Testar login com admin (deve ver Super Admin)
+- [x] Testar mudança de senha obrigatória
+- [x] Testar proteção de rotas no frontend e backend
+- [x] Verificar segurança das APIs
+
+## Status: CONCLUÍDO ✅
+Data: 22/06/2025
+
+## Implementações Realizadas:
+1. ✅ Login limpo sem credenciais demo
+2. ✅ Sistema de mudança obrigatória de senha
+3. ✅ Proteção completa de rotas admin
+4. ✅ Middleware de segurança no backend
+5. ✅ Controle de acesso baseado em role
+6. ✅ Testes de segurança validados
+
+## Próximos Passos:
+- Sistema pronto para produção
+- Todas as rotas protegidas
+- Autenticação segura implementada

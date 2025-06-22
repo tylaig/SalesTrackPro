@@ -68,6 +68,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/change-password', async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const session = (req as any).session;
+      
+      if (!session.user) {
+        return res.status(401).json({ message: 'Usuário não autenticado' });
+      }
+
+      // Get user from database
+      const user = await storage.getUserByEmail(session.user.email);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+      }
+
+      // Verify current password
+      if (user.password !== currentPassword) {
+        return res.status(400).json({ message: 'Senha atual incorreta' });
+      }
+
+      // Update password
+      await storage.updateUser(user.id, { 
+        password: newPassword, 
+        requirePasswordChange: false 
+      });
+
+      res.json({ success: true, message: 'Senha alterada com sucesso' });
+    } catch (error) {
+      console.error('Error changing password:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
   app.post('/api/logout', (req, res) => {
     (req as any).session.destroy((err: any) => {
       if (err) {
@@ -471,8 +504,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Middleware to protect admin routes
+  const requireAdmin = (req: any, res: any, next: any) => {
+    const session = req.session;
+    if (!session.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    
+    if (session.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin required.' });
+    }
+    
+    next();
+  };
+
   // Admin metrics
-  app.get("/api/admin/metrics", async (req, res) => {
+  app.get("/api/admin/metrics", requireAdmin, async (req, res) => {
     try {
       const metrics = await storage.getSuperAdminMetrics();
       res.json(metrics);
@@ -483,7 +530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Clear all data endpoint for Super Admin
-  app.post("/api/admin/clear-data", async (req, res) => {
+  app.post("/api/admin/clear-data", requireAdmin, async (req, res) => {
     try {
       await storage.clearAllSales();
       await storage.clearAllClients();
@@ -498,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Clear only sales
-  app.post("/api/admin/clear-sales", async (req, res) => {
+  app.post("/api/admin/clear-sales", requireAdmin, async (req, res) => {
     try {
       await storage.clearAllSales();
       res.json({ 
@@ -512,7 +559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Clear only clients (and their sales due to FK constraints)
-  app.post("/api/admin/clear-clients", async (req, res) => {
+  app.post("/api/admin/clear-clients", requireAdmin, async (req, res) => {
     try {
       await storage.clearAllSales(); // Clear sales first due to FK
       await storage.clearAllClients();
@@ -574,7 +621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/users/:id", async (req, res) => {
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       const success = await storage.deleteUser(userId);
