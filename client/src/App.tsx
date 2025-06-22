@@ -10,6 +10,7 @@ import Clients from "@/pages/Clients";
 import Support from "@/pages/Support";
 import Reports from "@/pages/Reports";
 import SuperAdmin from "@/pages/SuperAdmin";
+import WebhookTest from "@/pages/WebhookTest";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/navigation/Sidebar";

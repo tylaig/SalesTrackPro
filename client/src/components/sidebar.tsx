@@ -6,7 +6,8 @@ import {
   Users, 
   Headset, 
   FileText, 
-  UserCircle 
+  UserCircle,
+  Settings 
 } from "lucide-react";
 
 const navigation = [
@@ -15,6 +16,7 @@ const navigation = [
   { name: "Clientes", href: "/clients", icon: Users },
   { name: "Relatórios", href: "/reports", icon: FileText },
   { name: "Admin", href: "/super-admin", icon: UserCircle },
+  { name: "Webhook Test", href: "/webhook-test", icon: Settings },
 ];
 
 export default function Sidebar() {

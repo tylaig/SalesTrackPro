@@ -18,6 +18,7 @@ export interface IStorage {
   // Clients
   getClients(): Promise<Client[]>;
   getClient(id: number): Promise<Client | undefined>;
+  getClientByPhone(phone: string): Promise<Client | undefined>;
   createClient(client: InsertClient): Promise<Client>;
   updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined>;
   deleteClient(id: number): Promise<boolean>;
@@ -70,6 +71,9 @@ export interface IStorage {
     totalRecoveredValue: number;
     totalClients: number;
   }>;
+
+  // Webhook Processing
+  processWebhookEvent(eventData: any): Promise<{ success: boolean; message: string; }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -107,6 +111,11 @@ export class DatabaseStorage implements IStorage {
 
   async getClient(id: number): Promise<Client | undefined> {
     const [client] = await db.select().from(clients).where(eq(clients.id, id));
+    return client || undefined;
+  }
+
+  async getClientByPhone(phone: string): Promise<Client | undefined> {
+    const [client] = await db.select().from(clients).where(eq(clients.phone, phone));
     return client || undefined;
   }
 

@@ -74,6 +74,7 @@ export default function SalesTable({ sales, onStatusFilter }: SalesTableProps) {
                   <SelectItem value="all">Todos os status</SelectItem>
                   <SelectItem value="realized">Realizadas</SelectItem>
                   <SelectItem value="recovered">Recuperadas</SelectItem>
+                  <SelectItem value="pending">Pendentes</SelectItem>
                   <SelectItem value="lost">Perdidas</SelectItem>
                 </SelectContent>
               </Select>

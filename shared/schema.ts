@@ -18,20 +18,26 @@ export const users = pgTable("users", {
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  phone: varchar("phone", { length: 50 }),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }).notNull().unique(), // Phone as unique identifier
   company: varchar("company", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const sales = pgTable("sales", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").references(() => clients.id).notNull(),
+  clientId: integer("client_id").notNull().references(() => clients.id),
+  saleId: varchar("sale_id", { length: 50 }), // External sale ID from webhook
   product: varchar("product", { length: 255 }).notNull(),
   value: decimal("value", { precision: 10, scale: 2 }).notNull(),
-  status: varchar("status", { length: 50 }).notNull(), // 'realized', 'recovered', 'lost'
+  status: varchar("status", { length: 50 }).notNull(), // pending, realized, recovered, lost
+  paymentMethod: varchar("payment_method", { length: 100 }),
+  eventType: varchar("event_type", { length: 50 }), // PIX_GENERATED, SALE_APPROVED, ABANDONED_CART
+  utmCampaign: text("utm_campaign"),
+  utmMedium: text("utm_medium"),
+  utmContent: text("utm_content"),
+  originalPrice: varchar("original_price", { length: 50 }), // Store as received "R$ 97,90"
   date: timestamp("date").defaultNow().notNull(),
-  notes: text("notes"),
 });
 
 export const supportTickets = pgTable("support_tickets", {
@@ -100,7 +106,14 @@ export type InsertClient = z.infer<typeof insertClientSchema>;
 export type Client = typeof clients.$inferSelect;
 
 export type InsertSale = z.infer<typeof insertSaleSchema>;
-export type Sale = typeof sales.$inferSelect;
+export type Sale = typeof sales.$inferSelect & {
+  saleId?: string | null;
+  eventType?: string | null;
+  utmCampaign?: string | null;
+  utmMedium?: string | null;
+  utmContent?: string | null;
+  originalPrice?: string | null;
+};
 
 export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicket = typeof supportTickets.$inferSelect;

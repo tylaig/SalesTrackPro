@@ -1,0 +1,85 @@
+Precisamos criar um sistema na qual consigamos verificar as vendas recuperadas na qual receberemos um POST via API com a atualização dos Status.
+
+O Primeiro evento será de compra aprovada que receberemos o seguinte body:
+
+{
+      "event": "SALE_APPROVED",
+      "sale_id": "5NYB1P69",
+      "payment_method": "CREDIT_CARD",
+      "total_price": "R$ 97,90",
+      "customer": {
+        "name": "Osvaldo Dalfovo",
+        "email": "osvaldo.dalfovo@hotmail.com",
+        "phone_number": "5547984720087"
+      },
+      "products": [
+        {
+          "name": "Aplicativo Máquina de 14 Pontos"
+        }
+      ],
+      "utm": {
+        "utm_campaign": "TESTE DE CRIATIVO - AD 56 — Cópia|120225526951540789",
+        "utm_medium": "CJ 01 — Cópia — Cópia — Cópia 1|120225526952070789",
+        "utm_content": "AD 56|120225526952100789"
+      }
+    }
+
+    Ao receber este body temos que verificar a partir do campo "phone_number": "5547984720087" se o cliente ja existe e se ele possui algum evento anterior.
+
+    Inicialmente receberemos o evento de PIX gerado que será esse:
+
+    {
+  "event": "PIX_GENERATED",
+  "sale_id": "8K421YV7",
+  "payment_method": "PIX",
+  "total_price": "R$ 152,44",
+  "customer": {
+    "name": "Luzenir Marques",
+    "email": "luzenir@hotmail.com",
+    "phone_number": "5544999849562"
+  },
+  "products": [
+    {
+      "name": "Aplicativo Máquina de 14 Pontos"
+    }
+  ],
+  "utm": {
+    "utm_campaign": "TESTE DE CRIATIVO - AD 56 — Cópia|120225526951540789",
+    "utm_medium": "CJ 01 — Cópia — Cópia — Cópia 1|120225526952070789",
+    "utm_content": "AD 56|120225526952100789"
+  }
+}
+
+A partir dele temos que criar o cliente baseado no campo "phone_number": "5544999849562" e marcar como venda recuperada ao receber o evento de SALE_APPROVED para o mesmo numero, sendo assim o pix sendo gerado ele pagando marcamos como venda.
+
+E por ultimo receberemos o evento de :
+
+[
+  {
+    "body": {
+      "event": "ABANDONED_CART",
+      "sale_id": null,
+      "payment_method": null,
+      "total_price": "R$ 47,00",
+      "customer": {
+        "name": "Denis Silva",
+        "email": "soeds_@hotmail.com",
+        "phone_number": "5511948333175"
+      },
+      "products": [
+        {
+          "name": "Aplicativo Máquina de 14 Pontos"
+        }
+      ],
+      "utm": {
+        "utm_campaign": "",
+        "utm_medium": "",
+        "utm_content": ""
+      }
+    }
+  }
+]
+
+Na qual este evento marcaremos como venda perdida e apenas se posteriormente recebermos deste mesmo numero de telefone no campo   "phone_number": "5511948333175",  Marcaremos como venda recuperada ao receber o evento "SALE_APPROVED" deste mesmo numero de telefone.
+
+Tambem preciso de criar campos para visualizar os UTMS e as informações complementares do produto e do preço do produto

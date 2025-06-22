@@ -109,6 +109,17 @@ The application follows a monorepo pattern with shared types and schemas:
 
 ## Recent Updates
 
+### Advanced Webhook Sales Recovery System (June 22, 2025)
+- Implemented comprehensive webhook system for tracking sales events and recoveries
+- Added phone number-based client identification and automatic client creation
+- Created intelligent sales recovery logic for three event types:
+  * PIX_GENERATED: Creates pending sales awaiting payment completion
+  * SALE_APPROVED: Marks as realized or recovered based on client history  
+  * ABANDONED_CART: Tracks lost sales for future recovery opportunities
+- Enhanced sales table with UTM tracking, event types, and original pricing data
+- Added webhook testing interface for development and debugging
+- Updated database schema with sale_id, event_type, and UTM campaign fields
+
 ### System Simplification and User Management Enhancement (June 21, 2025)
 - Removed support system completely from sidebar and application
 - Migrated user authentication from username to email-based login

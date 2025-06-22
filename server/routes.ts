@@ -815,6 +815,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Webhook endpoint for sales events
+  app.post("/api/webhook/sales", async (req, res) => {
+    try {
+      console.log('Received webhook event:', JSON.stringify(req.body, null, 2));
+      
+      let eventData = req.body;
+      
+      // Handle array format (like ABANDONED_CART)
+      if (Array.isArray(eventData) && eventData.length > 0) {
+        eventData = eventData[0].body || eventData[0];
+      }
+
+      const result = await storage.processWebhookEvent(eventData);
+      
+      if (result.success) {
+        res.status(200).json({ success: true, message: result.message });
+      } else {
+        res.status(400).json({ success: false, message: result.message });
+      }
+    } catch (error) {
+      console.error('Webhook processing error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Erro interno do servidor ao processar webhook' 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
