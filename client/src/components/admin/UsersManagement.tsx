@@ -30,6 +30,7 @@ export default function UsersManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [createdUserPassword, setCreatedUserPassword] = useState("");
+  const [tempPassword, setTempPassword] = useState("");
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userFormSchema),
@@ -45,11 +46,16 @@ export default function UsersManagement() {
     queryKey: ["/api/admin/users"],
   });
 
+  const generatePassword = () => {
+    const newPassword = Math.random().toString(36).slice(-12);
+    setTempPassword(newPassword);
+  };
+
   const createUserMutation = useMutation({
     mutationFn: async (data: UserFormData) => {
-      // Generate temporary password
-      const tempPassword = Math.random().toString(36).slice(-12);
-      const userData = { ...data, tempPassword, requirePasswordChange: true };
+      // Use generated password or create new one
+      const passwordToUse = tempPassword || Math.random().toString(36).slice(-12);
+      const userData = { ...data, tempPassword: passwordToUse, requirePasswordChange: true };
       
       const response = await fetch("/api/admin/users", {
         method: "POST",
@@ -69,6 +75,7 @@ export default function UsersManagement() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
       form.reset();
+      setTempPassword(""); // Clear temp password
       
       // Show password dialog
       setCreatedUserPassword(data.tempPassword);
@@ -151,7 +158,7 @@ export default function UsersManagement() {
   };
 
   const handleDelete = async (userId: number) => {
-    if (confirm("Are you sure you want to delete this user?")) {
+    if (confirm("Tem certeza que deseja excluir este usuário?")) {
       deleteUserMutation.mutate(userId);
     }
   };
@@ -238,10 +245,50 @@ export default function UsersManagement() {
                     <Label htmlFor="isActive">Usuário Ativo</Label>
                   </div>
                   {!editingUser && (
-                    <div className="p-3 bg-blue-50 rounded-md">
-                      <p className="text-sm text-blue-700">
-                        Uma senha temporária será gerada automaticamente e o usuário será obrigado a alterá-la no primeiro login.
-                      </p>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="tempPassword">Senha Temporária</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="tempPassword"
+                            value={tempPassword}
+                            onChange={(e) => setTempPassword(e.target.value)}
+                            placeholder="Clique em 'Gerar' para criar uma senha"
+                            className="font-mono"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={generatePassword}
+                          >
+                            Gerar
+                          </Button>
+                          {tempPassword && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                navigator.clipboard.writeText(tempPassword);
+                                toast({
+                                  title: "Copiado!",
+                                  description: "Senha copiada para a área de transferência",
+                                });
+                              }}
+                            >
+                              📋
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded-md">
+                        <p className="text-sm text-blue-700">
+                          {tempPassword ? 
+                            "Senha temporária definida. O usuário será obrigado a alterá-la no primeiro login." :
+                            "Uma senha temporária será gerada automaticamente se não for definida."
+                          }
+                        </p>
+                      </div>
                     </div>
                   )}
                   <DialogFooter>
