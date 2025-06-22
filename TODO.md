@@ -34,7 +34,7 @@
 
 ## ✅ FUNCIONALIDADES UI/UX COMPLETAS - FASE 2
 
-### Status das 12 Tarefas - TODAS FUNCIONAIS
+### Status das 12 Tarefas - CORRIGINDO CLIENTES
 - [x] 1. Dashboard: Botões "Mensal", "Semanal", "Diário" funcionais em Tendências de Vendas
 - [x] 2. Navegação: Sidebar sticky e toggle mobile funcionando perfeitamente
 - [x] 3. Vendas: Página completamente funcional com ações (editar, visualizar, excluir)
@@ -42,11 +42,16 @@
 - [x] 5. Vendas: Busca e filtros funcionais em tempo real (Status, Período)
 - [x] 6. Vendas: Botão "Exportar" funcional gerando CSV
 - [x] 7. Clientes: Botão "+Cliente" removido
-- [x] 8. Clientes: Filtros e barra de busca funcionais  
+- [x] 8. Clientes: Filtros e barra de busca funcionais (useState corrigido)
 - [x] 9. Clientes: Histórico de eventos funcional (dados do webhook)
 - [x] 10. Relatórios: Página funcional com filtros e botão "Exportar PDF"
 - [x] 11. Super Admin: Nova aba para limpar dados com confirmação "CONFIRMAR"
 - [x] 12. Super Admin: Webhook-test movido para lá, sidebar atualizada
+
+### PROBLEMA CRÍTICO CORRIGIDO
+- [x] Corrigir useState não definido na página Clientes (import adicionado)
+- [x] Testar página Clientes após correção
+- [x] Verificar histórico de eventos funcional
 
 ### Sistema Completamente Funcional
 - [x] Tabela client_events criada e funcionando
