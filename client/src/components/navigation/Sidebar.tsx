@@ -28,7 +28,7 @@ interface SidebarProps {
 
 export default function Sidebar({ onLogout }: SidebarProps) {
   const [location] = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileCollapsed, setIsMobileCollapsed] = useState(true);
 
   return (
     <>
