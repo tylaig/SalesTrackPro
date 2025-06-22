@@ -68,6 +68,14 @@
 - [x] Corrigir erro Badge não definido na página Clientes
 - [x] Atualizar tipos de eventos para corresponder aos novos padrões
 
+## 11. CORREÇÃO FINAL - LÓGICA DE RECUPERAÇÃO COMPLETA
+- [x] Corrigir lógica para PIX_GENERATED → SALE_APPROVED = recuperada
+- [x] Incluir cenário: cliente gera PIX, não paga, depois compra = recuperação
+- [x] Criar função fixExistingRecoveries() para corrigir dados existentes
+- [x] Adicionar botão "Corrigir Recuperações" no Super Admin
+- [x] Implementar análise de padrões históricos nos dados existentes
+- [x] Testar correção com dados reais do banco
+
 ## Status: SISTEMA COMPLETO E FUNCIONAL ✅
 Data: 22/06/2025
 

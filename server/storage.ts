@@ -526,22 +526,25 @@ export class DatabaseStorage implements IStorage {
           let status = 'realized';
           let message = 'Venda aprovada registrada';
 
-          // Check if client has lost sales to recover
+          // Check if client has lost sales or pending PIX to recover
           const lostSales = previousSales.filter(sale => sale.status === 'lost');
           const pendingSales = previousSales.filter(sale => sale.status === 'pending');
+          
+          // Check if client had any previous abandonment (lost sales or pending PIX)
+          const hasAbandonmentHistory = lostSales.length > 0 || pendingSales.length > 0;
 
           if (pendingSales.length > 0) {
-            // Update most recent pending sale to realized
+            // Update most recent pending sale to recovered (PIX was generated, then approved)
             const pendingSale = pendingSales[0];
             await db.update(sales)
               .set({ 
-                status: 'realized', 
+                status: 'recovered', 
                 eventType: event, 
                 saleId: sale_id,
                 updatedAt: new Date()
               })
               .where(eq(sales.id, pendingSale.id));
-            message = 'Venda PIX aprovada com sucesso';
+            message = 'Venda recuperada com sucesso - PIX gerado e depois aprovado';
           } else if (lostSales.length > 0) {
             // Update most recent lost sale to recovered
             const lostSale = lostSales[0];
@@ -583,7 +586,8 @@ export class DatabaseStorage implements IStorage {
             metadata: {
               utm: utm,
               originalPrice: total_price,
-              recoveryType: lostSales.length > 0 ? 'recovered' : (pendingSales.length > 0 ? 'pix_approved' : 'new_sale')
+              recoveryType: hasAbandonmentHistory ? 'recovered' : 'new_sale',
+              hadPreviousAbandonments: hasAbandonmentHistory
             }
           });
 
@@ -635,6 +639,54 @@ export class DatabaseStorage implements IStorage {
 
   async clearAllClients(): Promise<void> {
     await db.delete(clients);
+  }
+
+  // Fix existing data - mark sales as recovered when appropriate
+  async fixExistingRecoveries(): Promise<{ fixed: number; message: string }> {
+    try {
+      let fixedCount = 0;
+      
+      // Get all clients
+      const allClients = await db.select().from(clients);
+      
+      for (const client of allClients) {
+        // Get all sales for this client ordered by date
+        const clientSales = await db.select().from(sales)
+          .where(eq(sales.clientId, client.id))
+          .orderBy(asc(sales.date));
+        
+        // Find patterns: ABANDONED_CART or PIX_GENERATED followed by SALE_APPROVED
+        for (let i = 0; i < clientSales.length - 1; i++) {
+          const currentSale = clientSales[i];
+          const nextSale = clientSales[i + 1];
+          
+          // Check if current sale is abandonment (lost or pending) and next is approved
+          if ((currentSale.status === 'lost' || currentSale.status === 'pending') && 
+              nextSale.status === 'realized' && 
+              nextSale.eventType === 'SALE_APPROVED') {
+            
+            // Update the approved sale to recovered and remove the abandoned sale
+            await db.update(sales)
+              .set({ status: 'recovered', updatedAt: new Date() })
+              .where(eq(sales.id, nextSale.id));
+            
+            // Remove the abandoned/pending sale since it was recovered
+            await db.delete(sales).where(eq(sales.id, currentSale.id));
+            
+            fixedCount++;
+            console.log(`Fixed recovery for client ${client.name}: Sale ${nextSale.id} marked as recovered, removed abandoned sale ${currentSale.id}`);
+          }
+        }
+      }
+      
+      return { 
+        fixed: fixedCount, 
+        message: `Corrigidas ${fixedCount} vendas que deveriam estar marcadas como recuperadas` 
+      };
+    } catch (error) {
+      console.error('Error fixing existing recoveries:', error);
+      throw error;
+    }
   }
 }
 
