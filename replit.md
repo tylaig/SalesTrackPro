@@ -109,6 +109,15 @@ The application follows a monorepo pattern with shared types and schemas:
 
 ## Recent Updates
 
+### System Simplification and User Management Enhancement (June 21, 2025)
+- Removed support system completely from sidebar and application
+- Migrated user authentication from username to email-based login
+- Enhanced user management with temporary password generation and activation/deactivation
+- Removed Plans, Webhooks, and WhatsApp Chips management completely
+- Simplified Super Admin to focus only on Users and Dashboard analytics
+- Users now require email, name, role, and active status with password change enforcement
+- Streamlined dashboard metrics to show only essential business data
+
 ### Advanced Webhook Sales Processing System (June 20, 2025)
 - Implemented intelligent webhook receiver for payment processing with phone-based client identification
 - Events: payment_pending, payment_completed, payment_failed, recovery_purchase
@@ -138,11 +147,12 @@ The application follows a monorepo pattern with shared types and schemas:
 - Integrated all admin components with proper routing and navigation
 
 ### Authentication System (June 20, 2025)
-- Implemented complete login/logout authentication system
-- Added login page with form validation and user credentials
+- Implemented complete email-based login/logout authentication system
+- Added login page with email validation and password requirements
+- Users must be active to login and can be required to change password on first login
 - Integrated authentication state management with localStorage
 - Added logout functionality to sidebar navigation
-- Demo credentials: admin/password123
+- Enhanced user management with temporary password generation
 
 ### Support Ticket System Enhancement (June 20, 2025)
 - Corrected support ticket system to handle client-to-company requests

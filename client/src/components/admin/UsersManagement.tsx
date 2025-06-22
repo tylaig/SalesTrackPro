@@ -16,9 +16,10 @@ import { z } from "zod";
 import type { User } from "@shared/schema";
 
 const userFormSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  email: z.string().email("Email válido é obrigatório"),
+  name: z.string().min(1, "Nome é obrigatório"),
+  role: z.string().min(1, "Função é obrigatória"),
+  isActive: z.boolean().default(true),
 });
 
 type UserFormData = z.infer<typeof userFormSchema>;
@@ -31,9 +32,10 @@ export default function UsersManagement() {
   const form = useForm<UserFormData>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      username: "",
-      password: "",
       email: "",
+      name: "",
+      role: "user",
+      isActive: true,
     },
   });
 
@@ -43,7 +45,10 @@ export default function UsersManagement() {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: UserFormData) => {
-      return apiRequest("POST", "/api/admin/users", data);
+      // Generate temporary password
+      const tempPassword = Math.random().toString(36).slice(-12);
+      const userData = { ...data, tempPassword, requirePasswordChange: true };
+      return apiRequest("POST", "/api/admin/users", userData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -119,11 +124,45 @@ export default function UsersManagement() {
   const handleEdit = (user: User) => {
     setEditingUser(user);
     form.reset({
-      username: user.username,
-      password: "",
       email: user.email || "",
+      name: user.name || "",
+      role: user.role || "user",
+      isActive: user.isActive !== false,
     });
     setIsDialogOpen(true);
+  };
+
+  const toggleUserStatus = async (userId: number, currentStatus: boolean) => {
+    try {
+      await apiRequest("PUT", `/api/admin/users/${userId}`, { isActive: !currentStatus });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Sucesso",
+        description: `Usuário ${!currentStatus ? 'ativado' : 'desativado'} com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao alterar status do usuário",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const generateTempPassword = async (userId: number) => {
+    try {
+      const response = await apiRequest("POST", `/api/admin/users/${userId}/reset-password`, {});
+      toast({
+        title: "Senha temporária gerada",
+        description: `Nova senha: ${response.tempPassword}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao gerar senha temporária",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = (userId: number) => {
@@ -172,25 +211,12 @@ export default function UsersManagement() {
               </DialogHeader>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <div>
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    {...form.register("username")}
-                    placeholder="Enter username"
-                  />
-                  {form.formState.errors.username && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {form.formState.errors.username.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="email">Email (optional)</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     {...form.register("email")}
-                    placeholder="Enter email"
+                    placeholder="Digite o email"
                   />
                   {form.formState.errors.email && (
                     <p className="text-sm text-red-500 mt-1">
@@ -199,27 +225,57 @@ export default function UsersManagement() {
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="password">
-                    {editingUser ? "New Password (leave blank to keep current)" : "Password"}
-                  </Label>
+                  <Label htmlFor="name">Nome Completo</Label>
                   <Input
-                    id="password"
-                    type="password"
-                    {...form.register("password")}
-                    placeholder="Enter password"
+                    id="name"
+                    {...form.register("name")}
+                    placeholder="Digite o nome completo"
                   />
-                  {form.formState.errors.password && (
+                  {form.formState.errors.name && (
                     <p className="text-sm text-red-500 mt-1">
-                      {form.formState.errors.password.message}
+                      {form.formState.errors.name.message}
                     </p>
                   )}
                 </div>
+                <div>
+                  <Label htmlFor="role">Função</Label>
+                  <select
+                    id="role"
+                    {...form.register("role")}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="user">Usuário</option>
+                    <option value="manager">Gerente</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                  {form.formState.errors.role && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {form.formState.errors.role.message}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    {...form.register("isActive")}
+                    className="rounded"
+                  />
+                  <Label htmlFor="isActive">Usuário Ativo</Label>
+                </div>
+                {!editingUser && (
+                  <div className="p-3 bg-blue-50 rounded-md">
+                    <p className="text-sm text-blue-700">
+                      Uma senha temporária será gerada automaticamente e o usuário será obrigado a alterá-la no primeiro login.
+                    </p>
+                  </div>
+                )}
                 <DialogFooter>
                   <Button
                     type="submit"
                     disabled={createUserMutation.isPending || updateUserMutation.isPending}
                   >
-                    {editingUser ? "Update User" : "Create User"}
+                    {editingUser ? "Atualizar Usuário" : "Criar Usuário"}
                   </Button>
                 </DialogFooter>
               </form>

@@ -28,7 +28,6 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/sales" component={Sales} />
           <Route path="/clients" component={Clients} />
-          <Route path="/support" component={Support} />
           <Route path="/reports" component={Reports} />
           <Route path="/super-admin" component={SuperAdmin} />
           <Route component={NotFound} />

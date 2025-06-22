@@ -6,10 +6,7 @@ import {
   insertSaleSchema, 
   insertSupportTicketSchema,
   insertUserSchema,
-  insertPlanSchema,
-  insertWebhookSchema,
-  insertWhatsappChipSchema,
-  insertUserPlanSchema
+  insertClientEventSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -256,20 +253,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/users", async (req, res) => {
     try {
-      const result = insertUserSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid user data" });
-      }
-
-      const user = await storage.createUser(result.data);
-      res.status(201).json(user);
+      const { tempPassword, ...userData } = req.body;
+      const user = await storage.createUser({ ...userData, tempPassword });
+      res.status(201).json({ 
+        ...user, 
+        tempPassword: tempPassword || "temp123"
+      });
     } catch (error) {
       console.error("Error creating user:", error);
       res.status(500).json({ message: "Failed to create user" });
     }
   });
 
-  app.patch("/api/admin/users/:id", async (req, res) => {
+  app.put("/api/admin/users/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const user = await storage.updateUser(id, req.body);
@@ -283,139 +279,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/users/:id", async (req, res) => {
+  app.post("/api/admin/users/:id/reset-password", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const success = await storage.deleteUser(id);
-      if (!success) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      res.json({ success: true });
+      const result = await storage.resetUserPassword(id);
+      res.json(result);
     } catch (error) {
-      console.error("Error deleting user:", error);
-      res.status(500).json({ message: "Failed to delete user" });
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: "Failed to reset password" });
     }
   });
 
-  // Plans management
-  app.get("/api/admin/plans", async (req, res) => {
-    try {
-      const plans = await storage.getPlans();
-      res.json(plans);
-    } catch (error) {
-      console.error("Error fetching plans:", error);
-      res.status(500).json({ message: "Failed to fetch plans" });
-    }
-  });
 
-  app.post("/api/admin/plans", async (req, res) => {
-    try {
-      const result = insertPlanSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid plan data" });
-      }
-
-      const plan = await storage.createPlan(result.data);
-      res.status(201).json(plan);
-    } catch (error) {
-      console.error("Error creating plan:", error);
-      res.status(500).json({ message: "Failed to create plan" });
-    }
-  });
-
-  app.patch("/api/admin/plans/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const plan = await storage.updatePlan(id, req.body);
-      if (!plan) {
-        return res.status(404).json({ message: "Plan not found" });
-      }
-      res.json(plan);
-    } catch (error) {
-      console.error("Error updating plan:", error);
-      res.status(500).json({ message: "Failed to update plan" });
-    }
-  });
-
-  app.delete("/api/admin/plans/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const success = await storage.deletePlan(id);
-      if (!success) {
-        return res.status(404).json({ message: "Plan not found" });
-      }
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting plan:", error);
-      res.status(500).json({ message: "Failed to delete plan" });
-    }
-  });
-
-  // Webhooks management
-  app.get("/api/admin/webhooks", async (req, res) => {
-    try {
-      const webhooks = await storage.getWebhooks();
-      res.json(webhooks);
-    } catch (error) {
-      console.error("Error fetching webhooks:", error);
-      res.status(500).json({ message: "Failed to fetch webhooks" });
-    }
-  });
-
-  app.post("/api/admin/webhooks", async (req, res) => {
-    try {
-      const result = insertWebhookSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid webhook data" });
-      }
-
-      const webhook = await storage.createWebhook(result.data);
-      res.status(201).json(webhook);
-    } catch (error) {
-      console.error("Error creating webhook:", error);
-      res.status(500).json({ message: "Failed to create webhook" });
-    }
-  });
-
-  app.patch("/api/admin/webhooks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const webhook = await storage.updateWebhook(id, req.body);
-      if (!webhook) {
-        return res.status(404).json({ message: "Webhook not found" });
-      }
-      res.json(webhook);
-    } catch (error) {
-      console.error("Error updating webhook:", error);
-      res.status(500).json({ message: "Failed to update webhook" });
-    }
-  });
-
-  app.delete("/api/admin/webhooks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const success = await storage.deleteWebhook(id);
-      if (!success) {
-        return res.status(404).json({ message: "Webhook not found" });
-      }
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting webhook:", error);
-      res.status(500).json({ message: "Failed to delete webhook" });
-    }
-  });
-
-  app.post("/api/admin/webhooks/:id/trigger", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { eventType, payload } = req.body;
-      const success = await storage.triggerWebhook(id, eventType, payload);
-      res.json({ success });
-    } catch (error) {
-      console.error("Error triggering webhook:", error);
-      res.status(500).json({ message: "Failed to trigger webhook" });
-    }
-  });
 
   // Client events endpoint
   app.get("/api/clients/:id/events", async (req, res) => {

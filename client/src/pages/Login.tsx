@@ -11,7 +11,7 @@ import { TrendingUp, LogIn, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Nome de usuário é obrigatório"),
+  email: z.string().email("Email válido é obrigatório"),
   password: z.string().min(1, "Senha é obrigatória"),
 });
 
@@ -29,7 +29,7 @@ export default function Login({ onLogin }: LoginProps) {
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -37,11 +37,18 @@ export default function Login({ onLogin }: LoginProps) {
   const handleLogin = async (data: LoginData) => {
     setIsLoading(true);
     
-    // Simulação de autenticação - em produção seria uma chamada para API
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (data.username === "admin" && data.password === "password123") {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
         toast({
           title: "Login realizado com sucesso!",
           description: "Bem-vindo ao Dashboard de Vendas",
@@ -50,7 +57,7 @@ export default function Login({ onLogin }: LoginProps) {
       } else {
         toast({
           title: "Erro no login",
-          description: "Nome de usuário ou senha incorretos",
+          description: result.message || "Credenciais inválidas",
           variant: "destructive",
         });
       }
@@ -85,13 +92,14 @@ export default function Login({ onLogin }: LoginProps) {
               <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="username"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome de usuário</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Digite seu nome de usuário"
+                          type="email"
+                          placeholder="Digite seu email"
                           {...field}
                         />
                       </FormControl>
@@ -147,8 +155,8 @@ export default function Login({ onLogin }: LoginProps) {
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600 mb-2">Credenciais de demonstração:</p>
               <p className="text-xs text-gray-500">
-                <strong>Usuário:</strong> admin<br />
-                <strong>Senha:</strong> password123
+                <strong>Email:</strong> admin@dashboard.com<br />
+                <strong>Senha:</strong> admin123
               </p>
             </div>
           </CardContent>

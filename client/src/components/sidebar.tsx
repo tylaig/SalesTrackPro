@@ -13,8 +13,8 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: ChartLine },
   { name: "Vendas", href: "/sales", icon: ShoppingCart },
   { name: "Clientes", href: "/clients", icon: Users },
-  { name: "Suporte", href: "/support", icon: Headset },
   { name: "Relatórios", href: "/reports", icon: FileText },
+  { name: "Admin", href: "/super-admin", icon: UserCircle },
 ];
 
 export default function Sidebar() {
