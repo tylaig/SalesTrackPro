@@ -14,18 +14,17 @@ export default function Sidebar({ onLogout }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile toggle button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-md border"
+      {/* Mobile toggle button - SEMPRE VISÍVEL */}
+      <button
+        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-lg border border-gray-300 rounded-md p-2 hover:bg-gray-50"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
+        type="button"
       >
         {isMobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-      </Button>
+      </button>
 
       {/* Sidebar */}
-      <aside className={`${isMobileOpen ? 'block' : 'hidden'} md:block w-64 bg-white shadow-lg h-screen fixed md:sticky md:top-0 z-40 overflow-y-auto`}>
+      <aside className={`${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 w-64 bg-white shadow-lg h-screen fixed md:sticky md:top-0 z-40 overflow-y-auto transition-transform duration-300 ease-in-out`}>
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-800 flex items-center">
             <TrendingUp className="text-primary mr-2 h-6 w-6" />
