@@ -111,9 +111,27 @@ export default function SalesTrendChart({ data }: SalesTrendChartProps) {
             Tendência de Vendas
           </CardTitle>
           <div className="flex space-x-2">
-            <Button variant="default" size="sm">Mensal</Button>
-            <Button variant="ghost" size="sm">Semanal</Button>
-            <Button variant="ghost" size="sm">Diário</Button>
+            <Button 
+              variant={period === 'monthly' ? 'default' : 'ghost'} 
+              size="sm"
+              onClick={() => setPeriod('monthly')}
+            >
+              Mensal
+            </Button>
+            <Button 
+              variant={period === 'weekly' ? 'default' : 'ghost'} 
+              size="sm"
+              onClick={() => setPeriod('weekly')}
+            >
+              Semanal
+            </Button>
+            <Button 
+              variant={period === 'daily' ? 'default' : 'ghost'} 
+              size="sm"
+              onClick={() => setPeriod('daily')}
+            >
+              Diário
+            </Button>
           </div>
         </div>
       </CardHeader>
