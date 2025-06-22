@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import type { Client } from "@shared/schema";
 import ClientEventHistory from "@/components/client/ClientEventHistory";
 
@@ -40,7 +41,7 @@ export default function Clients() {
     );
   });
 
-  const ClientEventHistory = ({ clientId }: { clientId: number }) => {
+  const ClientEventHistory2 = ({ clientId }: { clientId: number }) => {
     const { data: events = [], isLoading: eventsLoading } = useQuery({
       queryKey: [`/api/clients/${clientId}/events`],
     });
@@ -59,9 +60,13 @@ export default function Clients() {
                   <Badge variant={
                     event.eventType === 'SALE_APPROVED' ? 'default' :
                     event.eventType === 'ABANDONED_CART' ? 'destructive' :
-                    'secondary'
+                    event.eventType === 'PIX_GENERATED' ? 'secondary' :
+                    'outline'
                   }>
-                    {event.eventType}
+                    {event.eventType === 'SALE_APPROVED' ? 'Venda Aprovada' :
+                     event.eventType === 'ABANDONED_CART' ? 'Carrinho Abandonado' :
+                     event.eventType === 'PIX_GENERATED' ? 'PIX Gerado' :
+                     event.eventType}
                   </Badge>
                   <p className="text-sm mt-1">{event.product}</p>
                   <p className="text-xs text-gray-500">R$ {event.value}</p>
@@ -194,7 +199,7 @@ export default function Clients() {
                                     Histórico de Eventos - {client.name}
                                   </DialogTitle>
                                 </DialogHeader>
-                                <ClientEventHistory clientId={client.id} />
+                                <ClientEventHistory2 clientId={client.id} />
                               </DialogContent>
                             </Dialog>
                           </div>
