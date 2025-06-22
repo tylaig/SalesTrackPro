@@ -17,16 +17,85 @@ import {
   Trash2,
   AlertTriangle
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import UsersManagement from "@/components/admin/UsersManagement";
 import SuperAdminDashboard from "@/components/admin/SuperAdminDashboard";
 
 export default function SuperAdmin() {
   const [activeTab, setActiveTab] = useState("users");
+  const [confirmText, setConfirmText] = useState("");
+  const { toast } = useToast();
 
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ["/api/admin/metrics"],
     retry: false,
   });
+
+  const clearDataMutation = useMutation({
+    mutationFn: async (type: string) => {
+      await apiRequest(`/api/admin/clear-${type}`, "POST");
+    },
+    onSuccess: (data, variables) => {
+      const messages = {
+        data: "Todos os clientes e vendas foram removidos",
+        sales: "Todas as vendas foram removidas",
+        clients: "Todos os clientes e suas vendas foram removidos"
+      };
+      toast({
+        title: "Dados Limpos",
+        description: messages[variables as keyof typeof messages],
+      });
+      queryClient.invalidateQueries();
+      setConfirmText("");
+    },
+    onError: () => {
+      toast({
+        title: "Erro", 
+        description: "Falha ao limpar dados",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleClearAll = () => {
+    if (confirmText !== "CONFIRMAR") {
+      toast({
+        title: "Confirmação Inválida",
+        description: "Digite exatamente 'CONFIRMAR' para continuar",
+        variant: "destructive",
+      });
+      return;
+    }
+    clearDataMutation.mutate("data");
+  };
+
+  const handleClearSales = () => {
+    if (confirmText !== "CONFIRMAR") {
+      toast({
+        title: "Confirmação Inválida",
+        description: "Digite exatamente 'CONFIRMAR' para continuar",
+        variant: "destructive",
+      });
+      return;
+    }
+    clearDataMutation.mutate("sales");
+  };
+
+  const handleClearClients = () => {
+    if (confirmText !== "CONFIRMAR") {
+      toast({
+        title: "Confirmação Inválida",
+        description: "Digite exatamente 'CONFIRMAR' para continuar",
+        variant: "destructive",
+      });
+      return;
+    }
+    clearDataMutation.mutate("clients");
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
