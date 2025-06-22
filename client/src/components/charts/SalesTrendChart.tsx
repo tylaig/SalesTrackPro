@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Line } from "react-chartjs-2";
@@ -31,6 +32,7 @@ interface SalesTrendChartProps {
 }
 
 export default function SalesTrendChart({ data }: SalesTrendChartProps) {
+  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const monthlyData = data?.monthly || [];
   
   if (!monthlyData || monthlyData.length === 0) {
