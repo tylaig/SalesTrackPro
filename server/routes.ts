@@ -813,6 +813,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fix existing recoveries
+  app.post("/api/admin/fix-recoveries", requireAdmin, async (req, res) => {
+    try {
+      const result = await storage.fixExistingRecoveries();
+      res.json(result);
+    } catch (error) {
+      console.error("Error fixing recoveries:", error);
+      res.status(500).json({ message: "Failed to fix recoveries" });
+    }
+  });
+
+  // Data clearing endpoints
+  app.post("/api/admin/clear-sales", requireAdmin, async (req, res) => {
+    try {
+      await storage.clearAllSales();
+      res.json({ message: "Todas as vendas foram removidas" });
+    } catch (error) {
+      console.error("Error clearing sales:", error);
+      res.status(500).json({ message: "Failed to clear sales" });
+    }
+  });
+
+  app.post("/api/admin/clear-clients", requireAdmin, async (req, res) => {
+    try {
+      await storage.clearAllClients();
+      res.json({ message: "Todos os clientes foram removidos" });
+    } catch (error) {
+      console.error("Error clearing clients:", error);
+      res.status(500).json({ message: "Failed to clear clients" });
+    }
+  });
+
   app.post("/api/admin/whatsapp-chips/:id/recover", async (req, res) => {
     try {
       const chipId = parseInt(req.params.id);
