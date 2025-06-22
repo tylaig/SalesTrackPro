@@ -57,8 +57,8 @@ export default function Clients() {
               <div className="flex justify-between items-start">
                 <div>
                   <Badge variant={
-                    event.eventType === 'payment_completed' ? 'default' :
-                    event.eventType === 'payment_failed' ? 'destructive' :
+                    event.eventType === 'SALE_APPROVED' ? 'default' :
+                    event.eventType === 'ABANDONED_CART' ? 'destructive' :
                     'secondary'
                   }>
                     {event.eventType}

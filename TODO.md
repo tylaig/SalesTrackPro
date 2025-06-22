@@ -65,6 +65,8 @@
 - [x] Incluir metadados completos (UTM, preços, tipo de recuperação)
 - [x] Testar histórico de eventos com webhook real
 - [x] Adicionar logs de debug no componente ClientEventHistory
+- [x] Corrigir erro Badge não definido na página Clientes
+- [x] Atualizar tipos de eventos para corresponder aos novos padrões
 
 ## Status: SISTEMA COMPLETO E FUNCIONAL ✅
 Data: 22/06/2025
