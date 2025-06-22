@@ -16,7 +16,7 @@ export default function Sidebar({ onLogout, isOpen = false, onClose }: SidebarPr
   return (
     <>
       {/* Sidebar */}
-      <aside className={`${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 w-64 bg-white shadow-lg h-screen fixed md:sticky md:top-0 z-40 overflow-y-auto transition-transform duration-300 ease-in-out`}>
+      <aside className={`${isOpen ? 'translate-x-0' : '-translate-x-full'} w-64 bg-white shadow-lg h-screen fixed top-0 left-0 z-40 overflow-y-auto transition-transform duration-300 ease-in-out`}>
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-800 flex items-center">
             <TrendingUp className="text-primary mr-2 h-6 w-6" />

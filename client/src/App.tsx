@@ -23,17 +23,17 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Toggle Button SEMPRE VISÍVEL em mobile */}
+    <div className="flex min-h-screen bg-background relative">
+      {/* Toggle Button SEMPRE VISÍVEL - em desktop e mobile */}
       <button
-        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-lg border border-gray-300 rounded-md p-2 hover:bg-gray-50"
+        className="fixed top-4 left-4 z-50 bg-white shadow-lg border border-gray-300 rounded-md p-2 hover:bg-gray-50"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
         {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
       </button>
 
       <Sidebar onLogout={onLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <main className="flex-1 w-full min-h-screen">
+      <main className="flex-1 w-full min-h-screen ml-0">
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/dashboard" component={Dashboard} />
