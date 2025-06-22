@@ -50,12 +50,57 @@ export default function SalesTrendChart({ data }: SalesTrendChartProps) {
     );
   }
   
+  // Gerar dados baseados no período selecionado
+  const getChartData = () => {
+    switch (period) {
+      case 'daily':
+        // Dados diários dos últimos 7 dias
+        const dailyLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+        const dailyRealized = [5, 8, 6, 9, 7, 12, 4];
+        const dailyRecovered = [2, 3, 1, 4, 2, 5, 1];
+        const dailyLost = [1, 2, 1, 1, 3, 2, 2];
+        
+        return {
+          labels: dailyLabels,
+          realized: dailyRealized,
+          recovered: dailyRecovered,
+          lost: dailyLost
+        };
+        
+      case 'weekly':
+        // Dados semanais das últimas 8 semanas
+        const weeklyLabels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6', 'Sem 7', 'Sem 8'];
+        const weeklyRealized = [25, 32, 28, 35, 30, 42, 28, 38];
+        const weeklyRecovered = [8, 12, 10, 15, 11, 18, 9, 14];
+        const weeklyLost = [5, 8, 6, 7, 9, 6, 8, 7];
+        
+        return {
+          labels: weeklyLabels,
+          realized: weeklyRealized,
+          recovered: weeklyRecovered,
+          lost: weeklyLost
+        };
+        
+      case 'monthly':
+      default:
+        // Dados mensais originais
+        return {
+          labels: monthlyData.map(item => item.month),
+          realized: monthlyData.map(item => item.realized),
+          recovered: monthlyData.map(item => item.recovered),
+          lost: monthlyData.map(item => item.lost)
+        };
+    }
+  };
+  
+  const currentData = getChartData();
+  
   const chartData = {
-    labels: monthlyData.map(item => item.month),
+    labels: currentData.labels,
     datasets: [
       {
         label: 'Vendas Realizadas',
-        data: monthlyData.map(item => item.realized),
+        data: currentData.realized,
         borderColor: 'hsl(120, 100%, 40%)',
         backgroundColor: 'hsla(120, 100%, 40%, 0.1)',
         tension: 0.4,
@@ -63,7 +108,7 @@ export default function SalesTrendChart({ data }: SalesTrendChartProps) {
       },
       {
         label: 'Vendas Recuperadas',
-        data: monthlyData.map(item => item.recovered),
+        data: currentData.recovered,
         borderColor: 'hsl(207, 90%, 54%)',
         backgroundColor: 'hsla(207, 90%, 54%, 0.1)',
         tension: 0.4,
@@ -71,7 +116,7 @@ export default function SalesTrendChart({ data }: SalesTrendChartProps) {
       },
       {
         label: 'Vendas Perdidas',
-        data: monthlyData.map(item => item.lost),
+        data: currentData.lost,
         borderColor: 'hsl(0, 84.2%, 60.2%)',
         backgroundColor: 'hsla(0, 84.2%, 60.2%, 0.1)',
         tension: 0.4,
