@@ -10,32 +10,19 @@ async function initDatabase() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   
   try {
-    // Verificar se a tabela users existe
-    const checkTable = await pool.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'users'
-      );
+    console.log('Initializing database with admin user...');
+    
+    // Criar usuário admin
+    await pool.query(`
+      INSERT INTO users (email, name, password, role, is_active, require_password_change) 
+      VALUES ('admin@dashboard.com', 'Administrador', 'admin123', 'admin', true, false) 
+      ON CONFLICT (email) DO UPDATE SET 
+        password = 'admin123', 
+        is_active = true,
+        role = 'admin';
     `);
     
-    if (checkTable.rows[0].exists) {
-      console.log('Database tables already exist');
-      
-      // Criar usuário admin se não existir
-      await pool.query(`
-        INSERT INTO users (email, name, password, role, is_active, require_password_change) 
-        VALUES ('admin@dashboard.com', 'Administrador', 'admin123', 'admin', true, false) 
-        ON CONFLICT (email) DO UPDATE SET 
-          password = 'admin123', 
-          is_active = true,
-          role = 'admin';
-      `);
-      
-      console.log('Admin user created/updated successfully');
-    } else {
-      console.log('Database tables do not exist. Run npm run db:push first.');
-    }
+    console.log('Admin user created/updated successfully');
   } catch (error) {
     console.error('Database initialization error:', error);
   } finally {
