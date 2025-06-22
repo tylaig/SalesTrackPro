@@ -56,6 +56,8 @@
 - [x] Implementar atualização da venda perdida mais recente para status "recuperada"
 - [x] Evitar duplicação de vendas e inconsistência nos dados
 - [x] Manter histórico correto: carrinho abandonado → venda recuperada
+- [x] Corrigir nome hardcoded "João Silva" na barra lateral (FINALMENTE!)
+- [x] Testar lógica de recuperação com webhook real
 
 ## Status: SISTEMA COMPLETO E FUNCIONAL ✅
 Data: 22/06/2025

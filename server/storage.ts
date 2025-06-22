@@ -511,35 +511,42 @@ export class DatabaseStorage implements IStorage {
           let status = 'realized';
           let message = 'Venda aprovada registrada';
 
-          // Check if this is a recovery
-          const hasAbandonedCart = previousSales.some(sale => 
-            sale.eventType === 'ABANDONED_CART' || sale.status === 'lost'
-          );
-          const hasPendingPix = previousSales.some(sale => 
-            sale.eventType === 'PIX_GENERATED' && sale.status === 'pending'
-          );
+          // Check if client has lost sales to recover
+          const lostSales = previousSales.filter(sale => sale.status === 'lost');
+          const pendingSales = previousSales.filter(sale => sale.status === 'pending');
 
-          if (hasAbandonedCart || hasPendingPix) {
-            status = 'recovered';
-            message = 'Venda recuperada registrada com sucesso';
-          }
-
-          // Update pending PIX if exists
-          if (hasPendingPix) {
+          if (pendingSales.length > 0) {
+            // Update most recent pending sale to realized
+            const pendingSale = pendingSales[0];
             await db.update(sales)
-              .set({ status: 'recovered', eventType: event, saleId: sale_id })
-              .where(and(
-                eq(sales.clientId, client.id),
-                eq(sales.status, 'pending')
-              ));
+              .set({ 
+                status: 'realized', 
+                eventType: event, 
+                saleId: sale_id,
+                updatedAt: new Date()
+              })
+              .where(eq(sales.id, pendingSale.id));
+            message = 'Venda PIX aprovada com sucesso';
+          } else if (lostSales.length > 0) {
+            // Update most recent lost sale to recovered
+            const lostSale = lostSales[0];
+            await db.update(sales)
+              .set({ 
+                status: 'recovered', 
+                eventType: event, 
+                saleId: sale_id,
+                updatedAt: new Date()
+              })
+              .where(eq(sales.id, lostSale.id));
+            message = 'Venda recuperada com sucesso - carrinho abandonado recuperado';
           } else {
-            // Create new sale
+            // Create new sale for new customer
             await this.createSale({
               clientId: client.id,
               saleId: sale_id,
               product: productName,
               value: price.toString(),
-              status,
+              status: 'realized',
               paymentMethod: payment_method,
               eventType: event,
               utmCampaign: utm?.utm_campaign || null,
@@ -547,6 +554,7 @@ export class DatabaseStorage implements IStorage {
               utmContent: utm?.utm_content || null,
               originalPrice: total_price,
             });
+            message = 'Nova venda registrada com sucesso';
           }
 
           return { success: true, message };

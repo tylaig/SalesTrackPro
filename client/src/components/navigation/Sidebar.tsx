@@ -38,8 +38,8 @@ export default function Sidebar({ onLogout, isOpen = false, onClose, user }: Sid
             <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border-l-4 border-primary">
               <UserCircle className="text-primary h-8 w-8" />
               <div>
-                <p className="text-sm font-medium text-gray-800">João Silva</p>
-                <p className="text-xs text-gray-500">Cliente Premium</p>
+                <p className="text-sm font-medium text-gray-800">{user?.name || 'Usuário'}</p>
+                <p className="text-xs text-gray-500">{user?.role === 'admin' ? 'Administrador' : 'Usuário'}</p>
               </div>
             </div>
           </div>
