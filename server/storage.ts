@@ -293,13 +293,10 @@ export class DatabaseStorage implements IStorage {
         return clientDate >= sixtyDaysAgo && clientDate < thirtyDaysAgo;
       }).length;
 
-      // Calculate growth percentages with more realistic values
+      // Calculate growth percentages realistically
       const calculateGrowth = (current: number, previous: number): number => {
         if (previous === 0) {
-          // If no previous data, show modest positive growth based on current performance
-          if (current > 0) {
-            return Math.random() * 20 + 5; // Random between 5-25%
-          }
+          // First day of system - no comparison possible, return 0
           return 0;
         }
         return ((current - previous) / previous) * 100;
