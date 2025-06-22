@@ -7,7 +7,7 @@ import {
   type ClientEvent, type InsertClientEvent, type ClientWithEvents
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, count, sql } from "drizzle-orm";
+import { eq, desc, asc, and, gte, lte, count, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
