@@ -1,0 +1,33 @@
+FROM node:20-alpine
+
+# Instalar dependências do sistema
+RUN apk add --no-cache postgresql-client
+
+# Criar diretório da aplicação
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+
+# Instalar dependências de produção
+RUN npm ci --only=production
+
+# Copiar código da aplicação
+COPY . .
+
+# Construir a aplicação
+RUN npm run build
+
+# Expor porta
+EXPOSE 5000
+
+# Criar usuário não-root
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# Definir permissões
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+# Comando de inicialização
+CMD ["npm", "run", "start"]
