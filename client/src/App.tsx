@@ -33,7 +33,7 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
       </button>
 
       <Sidebar onLogout={onLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <main className="flex-1 w-full min-h-screen ml-0">
+      <main className={`flex-1 min-h-screen transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/dashboard" component={Dashboard} />

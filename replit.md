@@ -112,7 +112,7 @@ The application follows a monorepo pattern with shared types and schemas:
 ### Complete UI/UX Enhancement Phase 2 (June 22, 2025)
 - Implemented all 12 requested UI/UX improvements across the platform
 - Added functional period toggles (Daily/Weekly/Monthly) in Dashboard charts
-- Implemented mobile-responsive sidebar with toggle button for small screens
+- Implemented mobile-responsive sidebar with toggle button and content push behavior
 - Enhanced Sales page with functional search, filters, export, and action buttons
 - Removed manual entry buttons (+Vendas, +Cliente) as requested - all via API
 - Added real-time search and filtering across Sales and Clients pages
@@ -120,6 +120,7 @@ The application follows a monorepo pattern with shared types and schemas:
 - Enhanced Reports page with functional filters and PDF export simulation
 - Added Super Admin data clearing functionality with "CONFIRMAR" confirmation
 - Moved webhook testing to Super Admin area and updated sidebar navigation
+- Toggle sidebar now pushes content to the right (ml-64) instead of overlapping
 - All features tested and validated with real webhook data
 
 ### Advanced Webhook Sales Recovery System (June 22, 2025)
