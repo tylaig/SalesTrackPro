@@ -50,6 +50,13 @@
 - [x] Exibir nome real do usuário logado (user.name)
 - [x] Exibir role correto (Administrador/Usuário) baseado no user.role
 
+## 9. CORREÇÃO CRÍTICA - LÓGICA DE RECUPERAÇÃO DE VENDAS
+- [x] PROBLEMA IDENTIFICADO: Sistema criava nova venda ao invés de atualizar status
+- [x] Corrigir processamento de webhook SALE_APPROVED para clientes com vendas perdidas
+- [x] Implementar atualização da venda perdida mais recente para status "recuperada"
+- [x] Evitar duplicação de vendas e inconsistência nos dados
+- [x] Manter histórico correto: carrinho abandonado → venda recuperada
+
 ## Status: SISTEMA COMPLETO E FUNCIONAL ✅
 Data: 22/06/2025
 

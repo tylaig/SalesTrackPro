@@ -143,8 +143,9 @@ The application follows a monorepo pattern with shared types and schemas:
 - Added phone number-based client identification and automatic client creation
 - Created intelligent sales recovery logic for three event types:
   * PIX_GENERATED: Creates pending sales awaiting payment completion
-  * SALE_APPROVED: Marks as realized or recovered based on client history  
+  * SALE_APPROVED: Updates existing lost sales to recovered instead of creating duplicates
   * ABANDONED_CART: Tracks lost sales for future recovery opportunities
+- CRITICAL FIX: Recovery logic now updates existing lost sale status instead of creating new sales
 - Enhanced sales table with UTM tracking, event types, and original pricing data
 - Added webhook testing interface for development and debugging
 - Updated database schema with sale_id, event_type, and UTM campaign fields
