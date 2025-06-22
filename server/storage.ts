@@ -661,39 +661,37 @@ export class DatabaseStorage implements IStorage {
         
         console.log(`Client ${client.name} has ${clientSales.length} sales`);
         
-        // Look for patterns where client had abandonment followed by successful purchase
-        let hasAbandonment = false;
-        let hasSuccessfulPurchase = false;
-        let abandonmentSaleId = null;
-        let successfulSaleId = null;
-        
-        for (const sale of clientSales) {
+        // Look for sequence: abandonment events followed by purchase
+        for (let i = 0; i < clientSales.length; i++) {
+          const sale = clientSales[i];
           console.log(`Sale ${sale.id}: status=${sale.status}, eventType=${sale.eventType}, date=${sale.date}`);
           
-          // Mark if client had any form of abandonment
-          if (sale.status === 'lost' || (sale.status === 'pending' && sale.eventType === 'PIX_GENERATED')) {
-            hasAbandonment = true;
-            abandonmentSaleId = sale.id;
-            console.log(`Found abandonment: Sale ${sale.id}`);
+          // Check if this is a realized sale that should be marked as recovered
+          if (sale.status === 'realized' && sale.eventType === 'SALE_APPROVED') {
+            // Look for any previous abandonment events for this client
+            let hadPreviousAbandonment = false;
+            
+            for (let j = 0; j < i; j++) {
+              const previousSale = clientSales[j];
+              if (previousSale.status === 'lost' || 
+                  (previousSale.status === 'pending' && previousSale.eventType === 'PIX_GENERATED') ||
+                  previousSale.eventType === 'ABANDONED_CART') {
+                hadPreviousAbandonment = true;
+                console.log(`Found previous abandonment: Sale ${previousSale.id} (${previousSale.eventType})`);
+                break;
+              }
+            }
+            
+            // If client had previous abandonment, mark this sale as recovered
+            if (hadPreviousAbandonment) {
+              await db.update(sales)
+                .set({ status: 'recovered', updatedAt: new Date() })
+                .where(eq(sales.id, sale.id));
+              
+              fixedCount++;
+              console.log(`FIXED: Client ${client.name} - Sale ${sale.id} marked as recovered (had previous abandonment)`);
+            }
           }
-          
-          // Mark if client had successful purchase after abandonment
-          if (hasAbandonment && sale.status === 'realized' && sale.eventType === 'SALE_APPROVED') {
-            hasSuccessfulPurchase = true;
-            successfulSaleId = sale.id;
-            console.log(`Found successful purchase after abandonment: Sale ${sale.id}`);
-            break; // Only fix the first recovery
-          }
-        }
-        
-        // If client had abandonment followed by successful purchase, mark as recovery
-        if (hasAbandonment && hasSuccessfulPurchase && successfulSaleId) {
-          await db.update(sales)
-            .set({ status: 'recovered', updatedAt: new Date() })
-            .where(eq(sales.id, successfulSaleId));
-          
-          fixedCount++;
-          console.log(`FIXED: Client ${client.name} - Sale ${successfulSaleId} marked as recovered (had previous abandonment ${abandonmentSaleId})`);
         }
       }
       
