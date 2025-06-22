@@ -37,13 +37,13 @@ export default function Sidebar({ onLogout }: SidebarProps) {
         variant="ghost"
         size="sm"
         className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-md border"
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        onClick={() => setIsMobileCollapsed(!isMobileCollapsed)}
       >
-        {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+        {isMobileCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
       </Button>
 
       {/* Sidebar */}
-      <aside className={`${isCollapsed ? 'hidden' : 'block'} md:block w-64 bg-surface shadow-lg h-screen fixed md:relative z-40 overflow-y-auto`}>
+      <aside className={`${isMobileCollapsed ? 'hidden' : 'block'} md:block w-64 bg-white shadow-lg h-screen fixed md:sticky md:top-0 z-40 overflow-y-auto`}>
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-800 flex items-center">
             <TrendingUp className="text-primary mr-2 h-6 w-6" />
@@ -101,10 +101,10 @@ export default function Sidebar({ onLogout }: SidebarProps) {
     </aside>
     
     {/* Overlay for mobile */}
-    {!isCollapsed && (
+    {!isMobileCollapsed && (
       <div 
         className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-        onClick={() => setIsCollapsed(true)}
+        onClick={() => setIsMobileCollapsed(true)}
       />
     )}
   </>
