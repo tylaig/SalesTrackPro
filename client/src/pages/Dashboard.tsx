@@ -84,10 +84,10 @@ export default function Dashboard() {
             recoveredSales: metrics.recoveredSales || 0,
             lostSales: metrics.lostSales || 0,
             totalClients: metrics.totalClients || 0,
-            salesGrowth: 12.3,
-            recoveryGrowth: 8.7,
-            lossGrowth: -4.2,
-            clientGrowth: 15.6
+            salesGrowth: metrics.salesGrowth || 0,
+            recoveryGrowth: metrics.recoveryGrowth || 0,
+            lossGrowth: metrics.lossGrowth || 0,
+            clientGrowth: metrics.clientGrowth || 0
           }} />
         ) : (
           <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
