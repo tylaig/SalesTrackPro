@@ -33,6 +33,11 @@
 - [x] Sidebar exibindo opções baseadas no role do usuário
 - [x] Middleware de backend protegendo APIs admin
 
+## 6. CORREÇÃO DE REDIRECIONAMENTO
+- [x] Corrigir redirecionamento após login para dashboard (/)
+- [x] Corrigir redirecionamento após mudança de senha para dashboard (/)
+- [x] Implementar redirecionamento forçado no hook useAuth
+
 ## Status: SISTEMA COMPLETO E FUNCIONAL ✅
 Data: 22/06/2025
 

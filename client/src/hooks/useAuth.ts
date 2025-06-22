@@ -27,6 +27,8 @@ export function useAuth() {
   const login = (userData: User) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    // Force navigation to dashboard after login
+    window.location.href = '/';
   };
 
   const logout = () => {
