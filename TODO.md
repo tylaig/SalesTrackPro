@@ -38,6 +38,13 @@
 - [x] Corrigir redirecionamento após mudança de senha para dashboard (/)
 - [x] Implementar redirecionamento forçado no hook useAuth
 
+## 7. CORREÇÃO DE AUTENTICAÇÃO ADMIN
+- [x] Corrigir middleware requireAdmin que retornava erro 401
+- [x] Implementar armazenamento correto do usuário na sessão durante login
+- [x] Adicionar logs de debug para troubleshooting
+- [x] Verificar todas as rotas admin protegidas
+- [x] Testar exclusão de usuários e outras operações admin
+
 ## Status: SISTEMA COMPLETO E FUNCIONAL ✅
 Data: 22/06/2025
 

@@ -51,7 +51,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: user.role
       };
 
+      // Store user in session
+      (req as any).session.user = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      };
+
       console.log('Login successful for:', email);
+      
       res.json({ 
         success: true, 
         requirePasswordChange: user.requirePasswordChange,
@@ -507,8 +516,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to protect admin routes
   const requireAdmin = (req: any, res: any, next: any) => {
     const session = req.session;
-    if (!session.user) {
-      return res.status(401).json({ message: 'Unauthorized' });
+    
+    if (!session || !session.user) {
+      return res.status(401).json({ message: 'Unauthorized - No session' });
     }
     
     if (session.user.role !== 'admin') {
