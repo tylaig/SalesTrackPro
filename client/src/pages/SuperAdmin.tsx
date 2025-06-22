@@ -196,6 +196,53 @@ export default function SuperAdmin() {
 
           <TabsContent value="data">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Corrigir Recuperações */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-600">
+                    <TrendingUp className="h-5 w-5" />
+                    Corrigir Recuperações
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h3 className="font-semibold text-blue-800 mb-2">💡 Correção Automática</h3>
+                      <p className="text-blue-700 text-sm">
+                        Identifica clientes que abandonaram carrinho ou geraram PIX e depois compraram.
+                        Marca essas vendas como "recuperadas" automaticamente.
+                      </p>
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        fetch('/api/admin/fix-recoveries', { method: 'POST' })
+                          .then(res => res.json())
+                          .then(data => {
+                            toast({
+                              title: "Correção concluída",
+                              description: data.message,
+                            });
+                            queryClient.invalidateQueries();
+                          })
+                          .catch(() => {
+                            toast({
+                              title: "Erro",
+                              description: "Falha ao corrigir recuperações",
+                              variant: "destructive",
+                            });
+                          });
+                      }}
+                      variant="outline"
+                      className="w-full gap-2"
+                    >
+                      <TrendingUp className="h-4 w-4" />
+                      Corrigir Vendas Recuperadas
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Limpar Vendas */}
               <Card>
                 <CardHeader>
