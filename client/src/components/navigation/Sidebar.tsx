@@ -34,7 +34,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
     <>
       {/* Mobile toggle button - sempre visível */}
       <Button
-        variant="ghost"
+        variant="ghost" 
         size="sm"
         className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-md border"
         onClick={() => setIsMobileCollapsed(!isMobileCollapsed)}
