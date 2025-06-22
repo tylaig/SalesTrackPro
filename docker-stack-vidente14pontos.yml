@@ -16,6 +16,8 @@ services:
         git clone --depth=1 https://github.com/tylaig/SalesTrackPro.git . &&
         rm -rf .git &&
         npm install --legacy-peer-deps &&
+        echo 'y' | npm run db:push &&
+        npm run db:init &&
         npm run dev
       "
     environment:
