@@ -37,7 +37,16 @@ export default function SuperAdmin() {
 
   const clearDataMutation = useMutation({
     mutationFn: async (type: string) => {
-      await apiRequest(`/api/admin/clear-${type}`, "POST");
+      const response = await fetch(`/api/admin/clear-${type}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Falha ao limpar dados");
+      }
+      return response.json();
     },
     onSuccess: (data, variables) => {
       const messages = {
