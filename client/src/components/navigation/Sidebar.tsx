@@ -43,7 +43,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       </Button>
 
       {/* Sidebar */}
-      <aside className={`${isCollapsed ? 'hidden' : 'block'} md:block w-64 bg-surface shadow-lg h-screen fixed md:sticky md:top-0 z-40 overflow-y-auto`}>
+      <aside className={`${isCollapsed ? 'hidden' : 'block'} md:block w-64 bg-surface shadow-lg h-screen fixed md:relative z-40 overflow-y-auto`}>
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-800 flex items-center">
             <TrendingUp className="text-primary mr-2 h-6 w-6" />

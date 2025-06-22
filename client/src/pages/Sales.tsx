@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Eye, Edit, Trash2 } from "lucide-react";
+import { Search, Download, Eye } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import type { SaleWithClient } from "@shared/schema";
@@ -88,20 +88,7 @@ export default function Sales() {
     });
   };
 
-  const handleEditSale = (sale: SaleWithClient) => {
-    toast({
-      title: "Editar Venda",
-      description: "Funcionalidade em desenvolvimento",
-    });
-  };
 
-  const handleDeleteSale = (sale: SaleWithClient) => {
-    toast({
-      title: "Excluir Venda",
-      description: "Funcionalidade em desenvolvimento",
-      variant: "destructive",
-    });
-  };
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -223,35 +210,15 @@ export default function Sales() {
                         {formatDate(sale.date)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleViewSale(sale)}
-                            className="gap-1"
-                          >
-                            <Eye className="h-3 w-3" />
-                            Visualizar
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditSale(sale)}
-                            className="gap-1"
-                          >
-                            <Edit className="h-3 w-3" />
-                            Editar
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-red-600 gap-1"
-                            onClick={() => handleDeleteSale(sale)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                            Excluir
-                          </Button>
-                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewSale(sale)}
+                          className="gap-1"
+                        >
+                          <Eye className="h-3 w-3" />
+                          Detalhes
+                        </Button>
                       </td>
                     </tr>
                   ))}
