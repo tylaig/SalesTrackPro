@@ -411,11 +411,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Clear all data endpoint for Super Admin
   app.post("/api/admin/clear-data", async (req, res) => {
     try {
-      // Delete all sales first (due to foreign key constraints)
       await storage.clearAllSales();
-      // Delete all clients
       await storage.clearAllClients();
-      
       res.json({ 
         success: true, 
         message: "Todos os dados foram limpos com sucesso" 
@@ -423,6 +420,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error clearing data:", error);
       res.status(500).json({ message: "Failed to clear data" });
+    }
+  });
+
+  // Clear only sales
+  app.post("/api/admin/clear-sales", async (req, res) => {
+    try {
+      await storage.clearAllSales();
+      res.json({ 
+        success: true, 
+        message: "Todas as vendas foram removidas" 
+      });
+    } catch (error) {
+      console.error("Error clearing sales:", error);
+      res.status(500).json({ message: "Failed to clear sales" });
+    }
+  });
+
+  // Clear only clients (and their sales due to FK constraints)
+  app.post("/api/admin/clear-clients", async (req, res) => {
+    try {
+      await storage.clearAllSales(); // Clear sales first due to FK
+      await storage.clearAllClients();
+      res.json({ 
+        success: true, 
+        message: "Todos os clientes e suas vendas foram removidos" 
+      });
+    } catch (error) {
+      console.error("Error clearing clients:", error);
+      res.status(500).json({ message: "Failed to clear clients" });
     }
   });
 

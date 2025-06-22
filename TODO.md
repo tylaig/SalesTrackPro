@@ -48,7 +48,12 @@
 - [x] 11. Super Admin: Nova aba para limpar dados com confirmação "CONFIRMAR"
 - [x] 12. Super Admin: Aba webhook funcional implementada com interface completa
 
-### PROBLEMAS FINALMENTE CORRIGIDOS
+### PROBLEMA FINALMENTE RESOLVIDO
+- [x] Super Admin: Opções para limpar clientes e vendas separadamente implementadas
+- [x] Três botões funcionais: Limpar Vendas, Limpar Clientes, Limpar Tudo
+- [x] Endpoints específicos no backend para cada operação
+
+### PROBLEMAS CORRIGIDOS
 - [x] Toggle do menu: Botão melhorado para ocultar/mostrar sidebar (sempre visível)
 - [x] Super Admin: Aba webhook funcional implementada com interface completa
 - [x] Webhook Test: Totalmente integrado ao Super Admin com botões funcionais
