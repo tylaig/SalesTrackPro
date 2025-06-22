@@ -205,6 +205,10 @@ export class DatabaseStorage implements IStorage {
     recoveredSales: number;
     lostSales: number;
     totalClients: number;
+    salesGrowth: number;
+    recoveryGrowth: number;
+    lossGrowth: number;
+    clientGrowth: number;
   }> {
     try {
       console.log('Calculating sales metrics...');
@@ -238,11 +242,81 @@ export class DatabaseStorage implements IStorage {
         total: totalSalesValue
       });
 
+      // Calculate growth rates compared to previous month
+      const now = new Date();
+      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+
+      // Current month data
+      const currentMonthSales = allSales.filter(sale => {
+        const saleDate = new Date(sale.date);
+        return saleDate >= currentMonth;
+      });
+
+      const currentMonthRealized = currentMonthSales
+        .filter(sale => sale.status === 'realized')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
+      
+      const currentMonthRecovered = currentMonthSales
+        .filter(sale => sale.status === 'recovered')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
+        
+      const currentMonthLost = currentMonthSales
+        .filter(sale => sale.status === 'lost')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
+
+      const currentMonthClients = allClients.filter(client => {
+        const clientDate = new Date(client.createdAt);
+        return clientDate >= currentMonth;
+      }).length;
+
+      // Previous month data
+      const previousMonthSales = allSales.filter(sale => {
+        const saleDate = new Date(sale.date);
+        return saleDate >= previousMonth && saleDate < currentMonth;
+      });
+
+      const previousMonthRealized = previousMonthSales
+        .filter(sale => sale.status === 'realized')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
+      
+      const previousMonthRecovered = previousMonthSales
+        .filter(sale => sale.status === 'recovered')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
+        
+      const previousMonthLost = previousMonthSales
+        .filter(sale => sale.status === 'lost')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
+
+      const previousMonthClients = allClients.filter(client => {
+        const clientDate = new Date(client.createdAt);
+        return clientDate >= previousMonth && clientDate < currentMonth;
+      }).length;
+
+      // Calculate growth percentages
+      const calculateGrowth = (current: number, previous: number): number => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return ((current - previous) / previous) * 100;
+      };
+
+      const currentTotalSales = currentMonthRealized + currentMonthRecovered;
+      const previousTotalSales = previousMonthRealized + previousMonthRecovered;
+
+      const salesGrowth = calculateGrowth(currentTotalSales, previousTotalSales);
+      const recoveryGrowth = calculateGrowth(currentMonthRecovered, previousMonthRecovered);
+      const lossGrowth = calculateGrowth(currentMonthLost, previousMonthLost);
+      const clientGrowth = calculateGrowth(currentMonthClients, previousMonthClients);
+
       return {
         totalSales: totalSalesValue,
         recoveredSales: recoveredSalesValue,
         lostSales: lostSalesValue,
         totalClients: allClients.length,
+        salesGrowth: Math.round(salesGrowth * 10) / 10, // Round to 1 decimal
+        recoveryGrowth: Math.round(recoveryGrowth * 10) / 10,
+        lossGrowth: Math.round(lossGrowth * 10) / 10,
+        clientGrowth: Math.round(clientGrowth * 10) / 10,
       };
     } catch (error) {
       console.error('Error fetching sales metrics:', error);
