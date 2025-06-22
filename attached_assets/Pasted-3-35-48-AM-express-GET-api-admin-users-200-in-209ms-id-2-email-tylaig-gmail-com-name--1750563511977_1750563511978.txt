@@ -1,0 +1,133 @@
+3:35:48 AM [express] GET /api/admin/users 200 in 209ms :: [{"id":2,"email":"tylaig@gmail.com","name"…
+
+Webhook received: {
+
+  "event": "ABANDONED_CART",
+
+  "sale_id": null,
+
+  "payment_method": null,
+
+  "total_price": "R$ 97,90",
+
+  "customer": {
+
+    "name": "Paulo Roberto da Silva Pacheco ",
+
+    "email": "paulorobertodasilvapacheco@gmail.com",
+
+    "phone_number": "5562993254553"
+
+  },
+
+  "products": [
+
+    {
+
+      "name": "Aplicativo Máquina de 14 Pontos"
+
+    }
+
+  ],
+
+  "utm": {
+
+    "utm_campaign": "TESTE DE CRIATIVO - AD 56|120225142227600789",
+
+    "utm_medium": "CJ 01 1|120225142227270789",
+
+    "utm_content": "AD 56 — Cópia|120225142902690789"
+
+  }
+
+}
+
+Processing webhook event data: {
+
+  "event": "ABANDONED_CART",
+
+  "sale_id": null,
+
+  "payment_method": null,
+
+  "total_price": "R$ 97,90",
+
+  "customer": {
+
+    "name": "Paulo Roberto da Silva Pacheco ",
+
+    "email": "paulorobertodasilvapacheco@gmail.com",
+
+    "phone_number": "5562993254553"
+
+  },
+
+  "products": [
+
+    {
+
+      "name": "Aplicativo Máquina de 14 Pontos"
+
+    }
+
+  ],
+
+  "utm": {
+
+    "utm_campaign": "TESTE DE CRIATIVO - AD 56|120225142227600789",
+
+    "utm_medium": "CJ 01 1|120225142227270789",
+
+    "utm_content": "AD 56 — Cópia|120225142902690789"
+
+  }
+
+}
+
+Webhook processed successfully: Carrinho abandonado registrado
+
+3:37:07 AM [express] POST /api/webhook/sales 200 in 1363ms :: {"success":true,"message":"Carrinho ab…
+
+Fetching sales charts from database...
+
+Fetching sales metrics from database...
+
+Sales charts fetched: {
+
+  monthly: [
+
+    { month: 'Jan', realized: 0, recovered: 0, lost: 0 },
+
+    { month: 'Feb', realized: 0, recovered: 0, lost: 0 },
+
+    { month: 'Mar', realized: 0, recovered: 0, lost: 0 },
+
+    { month: 'Apr', realized: 0, recovered: 0, lost: 0 },
+
+    { month: 'May', realized: 0, recovered: 0, lost: 0 },
+
+    { month: 'Jun', realized: 0, recovered: 0, lost: 0 }
+
+  ],
+
+  distribution: [ { status: 'lost', count: 1, value: 97.9 } ]
+
+}
+
+3:37:14 AM [express] GET /api/sales/charts 200 in 237ms :: {"monthly":[{"month":"Jan","realized":0,"…
+
+3:37:15 AM [express] GET /api/sales 200 in 853ms :: [{"id":9,"clientId":5,"saleId":null,"product":"A…
+
+Sales metrics fetched: {
+
+  totalSales: 97.9,
+
+  recoveredSales: 0,
+
+  lostSales: 97.9,
+
+  totalClients: 1
+
+}
+
+3:37:15 AM [express] GET /api/sales/metrics 200 in 1111ms :: {"totalSales":97.9,"recoveredSales":0,"…

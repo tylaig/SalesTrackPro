@@ -206,18 +206,36 @@ export class DatabaseStorage implements IStorage {
     totalClients: number;
   }> {
     try {
+      console.log('Calculating sales metrics...');
+      
       // Get all sales data
       const allSales = await db.select().from(sales);
       const allClients = await db.select().from(clients);
 
-      // Calculate totals by status
-      const totalSalesValue = allSales.reduce((sum, sale) => sum + Number(sale.value), 0);
+      console.log('All sales:', allSales.map(s => ({ id: s.id, status: s.status, value: s.value })));
+
+      // Calculate totals by status - ONLY realized and recovered count as total sales
+      const realizedSalesValue = allSales
+        .filter(sale => sale.status === 'realized')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
+        
       const recoveredSalesValue = allSales
         .filter(sale => sale.status === 'recovered')
         .reduce((sum, sale) => sum + Number(sale.value), 0);
+        
       const lostSalesValue = allSales
         .filter(sale => sale.status === 'lost')
         .reduce((sum, sale) => sum + Number(sale.value), 0);
+
+      // Total sales = realized + recovered (NOT including lost)
+      const totalSalesValue = realizedSalesValue + recoveredSalesValue;
+
+      console.log('Metrics calculated:', {
+        realized: realizedSalesValue,
+        recovered: recoveredSalesValue,
+        lost: lostSalesValue,
+        total: totalSalesValue
+      });
 
       return {
         totalSales: totalSalesValue,
