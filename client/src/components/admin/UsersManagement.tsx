@@ -28,6 +28,8 @@ export default function UsersManagement() {
   const { toast } = useToast();
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [createdUserPassword, setCreatedUserPassword] = useState("");
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userFormSchema),
@@ -111,9 +113,7 @@ export default function UsersManagement() {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
-      return apiRequest(`/api/admin/users/${userId}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/admin/users/${userId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -145,53 +145,19 @@ export default function UsersManagement() {
       email: user.email || "",
       name: user.name || "",
       role: user.role || "user",
-      isActive: user.isActive !== false,
+      isActive: user.isActive ?? true,
     });
     setIsDialogOpen(true);
   };
 
-  const toggleUserStatus = async (userId: number, currentStatus: boolean) => {
-    try {
-      await apiRequest("PUT", `/api/admin/users/${userId}`, { isActive: !currentStatus });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-      toast({
-        title: "Sucesso",
-        description: `Usuário ${!currentStatus ? 'ativado' : 'desativado'} com sucesso`,
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Falha ao alterar status do usuário",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const generateTempPassword = async (userId: number) => {
-    try {
-      const response = await apiRequest("POST", `/api/admin/users/${userId}/reset-password`, {});
-      toast({
-        title: "Senha temporária gerada",
-        description: `Nova senha: ${response.tempPassword}`,
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Falha ao gerar senha temporária",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDelete = (userId: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
+  const handleDelete = async (userId: number) => {
+    if (confirm("Are you sure you want to delete this user?")) {
       deleteUserMutation.mutate(userId);
     }
   };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString();
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('pt-BR').format(new Date(date));
   };
 
   if (isLoading) {
@@ -199,155 +165,200 @@ export default function UsersManagement() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Users Management
-            </CardTitle>
-            <CardDescription>
-              Manage system users and their access
-            </CardDescription>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Gerenciar Usuários
+              </CardTitle>
+              <CardDescription>Criar, editar e gerenciar contas de usuário</CardDescription>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => setEditingUser(null)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Usuário
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>{editingUser ? "Editar Usuário" : "Adicionar Novo Usuário"}</DialogTitle>
+                  <DialogDescription>
+                    {editingUser ? "Atualizar informações do usuário" : "Criar uma nova conta de usuário"}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      {...form.register("email")}
+                      placeholder="Digite o email"
+                    />
+                    {form.formState.errors.email && (
+                      <p className="text-sm text-red-600">{form.formState.errors.email.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nome Completo</Label>
+                    <Input
+                      id="name"
+                      {...form.register("name")}
+                      placeholder="Digite o nome completo"
+                    />
+                    {form.formState.errors.name && (
+                      <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Função</Label>
+                    <select 
+                      id="role"
+                      {...form.register("role")}
+                      className="w-full p-2 border rounded-md"
+                    >
+                      <option value="user">Usuário</option>
+                      <option value="admin">Administrador</option>
+                    </select>
+                    {form.formState.errors.role && (
+                      <p className="text-sm text-red-600">{form.formState.errors.role.message}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      {...form.register("isActive")}
+                      className="rounded"
+                    />
+                    <Label htmlFor="isActive">Usuário Ativo</Label>
+                  </div>
+                  {!editingUser && (
+                    <div className="p-3 bg-blue-50 rounded-md">
+                      <p className="text-sm text-blue-700">
+                        Uma senha temporária será gerada automaticamente e o usuário será obrigado a alterá-la no primeiro login.
+                      </p>
+                    </div>
+                  )}
+                  <DialogFooter>
+                    <Button
+                      type="submit"
+                      disabled={createUserMutation.isPending || updateUserMutation.isPending}
+                    >
+                      {editingUser ? "Atualizar Usuário" : "Criar Usuário"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setEditingUser(null); form.reset(); }}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add User
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingUser ? "Edit User" : "Add New User"}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingUser ? "Update user information" : "Create a new user account"}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...form.register("email")}
-                    placeholder="Digite o email"
-                  />
-                  {form.formState.errors.email && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {form.formState.errors.email.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="name">Nome Completo</Label>
-                  <Input
-                    id="name"
-                    {...form.register("name")}
-                    placeholder="Digite o nome completo"
-                  />
-                  {form.formState.errors.name && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {form.formState.errors.name.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="role">Função</Label>
-                  <select
-                    id="role"
-                    {...form.register("role")}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="user">Usuário</option>
-                    <option value="manager">Gerente</option>
-                    <option value="admin">Administrador</option>
-                  </select>
-                  {form.formState.errors.role && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {form.formState.errors.role.message}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    {...form.register("isActive")}
-                    className="rounded"
-                  />
-                  <Label htmlFor="isActive">Usuário Ativo</Label>
-                </div>
-                {!editingUser && (
-                  <div className="p-3 bg-blue-50 rounded-md">
-                    <p className="text-sm text-blue-700">
-                      Uma senha temporária será gerada automaticamente e o usuário será obrigado a alterá-la no primeiro login.
-                    </p>
-                  </div>
-                )}
-                <DialogFooter>
-                  <Button
-                    type="submit"
-                    disabled={createUserMutation.isPending || updateUserMutation.isPending}
-                  >
-                    {editingUser ? "Atualizar Usuário" : "Criar Usuário"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(users as User[]).map((user: User) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.id}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {user.username}
-                    <Badge variant="secondary">User</Badge>
-                  </div>
-                </TableCell>
-                <TableCell>{user.email || "No email"}</TableCell>
-                <TableCell>{formatDate(user.createdAt)}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(user)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(user.id)}
-                      disabled={deleteUserMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Função</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+            </TableHeader>
+            <TableBody>
+              {(users as User[]).map((user: User) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.id}</TableCell>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email || "Sem email"}</TableCell>
+                  <TableCell>
+                    <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                      {user.role === 'admin' ? 'Administrador' : 'Usuário'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={user.isActive ? 'default' : 'destructive'}>
+                      {user.isActive ? 'Ativo' : 'Inativo'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(user)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(user.id)}
+                        disabled={deleteUserMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Password Display Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Senha Temporária Gerada</DialogTitle>
+            <DialogDescription>
+              Esta é a senha temporária para o usuário. Ele precisará alterá-la no primeiro login.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center space-x-2">
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="password" className="sr-only">
+                Senha
+              </Label>
+              <Input
+                id="password"
+                value={createdUserPassword}
+                readOnly
+                className="font-mono"
+              />
+            </div>
+            <Button 
+              type="button" 
+              size="sm" 
+              className="px-3"
+              onClick={() => {
+                navigator.clipboard.writeText(createdUserPassword);
+                toast({
+                  title: "Copiado!",
+                  description: "Senha copiada para a área de transferência",
+                });
+              }}
+            >
+              <span className="sr-only">Copiar</span>
+              📋
+            </Button>
+          </div>
+          <DialogFooter className="sm:justify-start">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowPasswordDialog(false)}
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
