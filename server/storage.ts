@@ -62,6 +62,7 @@ export interface IStorage {
   // Super Admin - Users Management
   getAllUsers(): Promise<User[]>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
   resetUserPassword(id: number): Promise<{ tempPassword: string }>;
   
   // Super Admin - Analytics
@@ -372,6 +373,16 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error updating user:", error);
       return undefined;
+    }
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(users).where(eq(users.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return false;
     }
   }
 
