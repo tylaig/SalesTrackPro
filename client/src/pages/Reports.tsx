@@ -77,7 +77,10 @@ export default function Reports() {
                 <SelectItem value="pending">Pendentes</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={handleExportPDF} className="gap-2">
+            <Button 
+              onClick={handleExportPDF} 
+              className="gap-2"
+            >
               <Download className="h-4 w-4" />
               Exportar PDF
             </Button>
