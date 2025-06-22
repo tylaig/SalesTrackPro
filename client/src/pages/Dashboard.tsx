@@ -6,8 +6,7 @@ import KPICards from "@/components/dashboard/KPICards";
 import SalesTrendChart from "@/components/charts/SalesTrendChart";
 import SalesDistributionChart from "@/components/charts/SalesDistributionChart";
 import SalesTable from "@/components/dashboard/SalesTable";
-import SupportForm from "@/components/support/SupportForm";
-import TicketsList from "@/components/support/TicketsList";
+
 import type { SaleWithClient } from "@shared/schema";
 
 export default function Dashboard() {
@@ -156,11 +155,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Support Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SupportForm />
-          <TicketsList />
-        </div>
+
       </div>
     </div>
   );

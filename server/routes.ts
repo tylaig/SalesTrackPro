@@ -818,24 +818,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook endpoint for sales events
   app.post("/api/webhook/sales", async (req, res) => {
     try {
-      console.log('Received webhook event:', JSON.stringify(req.body, null, 2));
+      console.log('Webhook received:', JSON.stringify(req.body, null, 2));
       
       let eventData = req.body;
       
       // Handle array format (like ABANDONED_CART)
       if (Array.isArray(eventData) && eventData.length > 0) {
         eventData = eventData[0].body || eventData[0];
+        console.log('Extracted event data from array:', JSON.stringify(eventData, null, 2));
+      }
+
+      // Validate required fields
+      if (!eventData || !eventData.event || !eventData.customer || !eventData.customer.phone_number) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Dados do webhook inválidos: evento, cliente ou telefone faltando' 
+        });
       }
 
       const result = await storage.processWebhookEvent(eventData);
       
       if (result.success) {
+        console.log(`Webhook processed successfully: ${result.message}`);
         res.status(200).json({ success: true, message: result.message });
       } else {
+        console.log(`Webhook processing failed: ${result.message}`);
         res.status(400).json({ success: false, message: result.message });
       }
     } catch (error) {
-      console.error('Webhook processing error:', error);
+      console.error('Error processing webhook:', error);
       res.status(500).json({ 
         success: false, 
         message: 'Erro interno do servidor ao processar webhook' 

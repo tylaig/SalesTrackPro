@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/Dashboard";
 import Sales from "@/pages/Sales";
 import Clients from "@/pages/Clients";
-import Support from "@/pages/Support";
+
 import Reports from "@/pages/Reports";
 import SuperAdmin from "@/pages/SuperAdmin";
 import WebhookTest from "@/pages/WebhookTest";

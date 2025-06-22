@@ -119,6 +119,9 @@ The application follows a monorepo pattern with shared types and schemas:
 - Enhanced sales table with UTM tracking, event types, and original pricing data
 - Added webhook testing interface for development and debugging
 - Updated database schema with sale_id, event_type, and UTM campaign fields
+- Fixed webhook payload parsing for array format events (ABANDONED_CART)
+- Completely removed support system from sidebar, dashboard, and routing
+- Added proper validation for webhook events and improved error handling
 
 ### System Simplification and User Management Enhancement (June 21, 2025)
 - Removed support system completely from sidebar and application
