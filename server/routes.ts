@@ -54,6 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Login successful for:', email);
       res.json({ 
         success: true, 
+        requirePasswordChange: user.requirePasswordChange,
         user: {
           id: user.id,
           email: user.email,
@@ -538,9 +539,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/users", async (req, res) => {
     try {
-      const userData = req.body;
-      const user = await storage.createUser(userData);
-      res.json(user);
+      const { tempPassword, ...userData } = req.body;
+      console.log('Creating user with data:', userData);
+      console.log('Temporary password:', tempPassword);
+      
+      const user = await storage.createUser({ 
+        ...userData, 
+        password: tempPassword,
+        requirePasswordChange: true 
+      });
+      
+      res.json({ 
+        ...user, 
+        tempPassword // Return temp password for display
+      });
     } catch (error) {
       console.error("Error creating user:", error);
       res.status(500).json({ message: "Failed to create user" });

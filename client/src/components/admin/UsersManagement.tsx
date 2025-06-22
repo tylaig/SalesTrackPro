@@ -48,21 +48,39 @@ export default function UsersManagement() {
       // Generate temporary password
       const tempPassword = Math.random().toString(36).slice(-12);
       const userData = { ...data, tempPassword, requirePasswordChange: true };
-      return apiRequest("POST", "/api/admin/users", userData);
+      
+      const response = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Falha ao criar usuário");
+      }
+      
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
       form.reset();
+      
+      // Show password dialog
+      setCreatedUserPassword(data.tempPassword);
+      setShowPasswordDialog(true);
+      
       toast({
-        title: "Success",
-        description: "User created successfully",
+        title: "Usuário criado",
+        description: "Usuário criado com sucesso. Senha temporária gerada.",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create user",
+        title: "Erro",
+        description: error.message || "Falha ao criar usuário",
         variant: "destructive",
       });
     },

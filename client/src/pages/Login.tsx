@@ -49,10 +49,20 @@ export default function Login({ onLogin }: LoginProps) {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo ao Dashboard de Vendas",
-        });
+        if (result.requirePasswordChange) {
+          toast({
+            title: "Troca de senha obrigatória",
+            description: "Você precisa alterar sua senha temporária",
+            variant: "destructive",
+          });
+          // TODO: Implement password change flow
+          alert("Você precisa alterar sua senha temporária. Funcionalidade será implementada.");
+        } else {
+          toast({
+            title: "Login realizado com sucesso!",
+            description: "Bem-vindo ao Dashboard de Vendas",
+          });
+        }
         onLogin(true);
       } else {
         toast({
