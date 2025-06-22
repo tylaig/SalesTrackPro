@@ -51,6 +51,7 @@ export default function Login({ onLogin }: LoginProps) {
       const result = await response.json();
 
       if (response.ok && result.success) {
+
         if (result.requirePasswordChange) {
           setShowPasswordChange(true);
         } else {

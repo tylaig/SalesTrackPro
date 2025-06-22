@@ -16,16 +16,24 @@ import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/navigation/Sidebar";
 import { useAuth } from "@/hooks/useAuth";
 
-function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boolean; onLogout: () => void; onLogin: (success: boolean) => void }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+
+function AppWithAuth() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isAuthenticated, isAdmin, user, login, logout } = useAuth();
+
+  const handleLogin = (success: boolean, userData?: any) => {
+    if (success && userData) {
+      login(userData);
+    }
+  };
 
   if (!isAuthenticated) {
-    return <Login onLogin={onLogin} />;
+    return <Login onLogin={handleLogin} />;
   }
 
   return (
     <div className="flex min-h-screen bg-background relative">
-      {/* Toggle Button SEMPRE VISÍVEL - em desktop e mobile */}
       <button
         className="fixed top-4 left-4 z-50 bg-white shadow-lg border border-gray-300 rounded-md p-2 hover:bg-gray-50"
         onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -33,7 +41,7 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
         {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
       </button>
 
-      <Sidebar onLogout={onLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar onLogout={logout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} user={user} />
       <main className={`flex-1 min-h-screen transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
         <Switch>
           <Route path="/" component={Dashboard} />
@@ -41,8 +49,8 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
           <Route path="/sales" component={Sales} />
           <Route path="/clients" component={Clients} />
           <Route path="/reports" component={Reports} />
-          <Route path="/super-admin" component={SuperAdmin} />
-          <Route path="/webhook-test" component={WebhookTest} />
+          {isAdmin && <Route path="/super-admin" component={SuperAdmin} />}
+          {isAdmin && <Route path="/webhook-test" component={WebhookTest} />}
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -51,27 +59,11 @@ function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boole
 }
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
-  });
-
-  const handleLogin = (success: boolean) => {
-    if (success) {
-      setIsAuthenticated(true);
-      localStorage.setItem('isLoggedIn', 'true');
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('isLoggedIn');
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <AppWithAuth />
         <Toaster />
-        <Router isAuthenticated={isAuthenticated} onLogout={handleLogout} onLogin={handleLogin} />
       </TooltipProvider>
     </QueryClientProvider>
   );

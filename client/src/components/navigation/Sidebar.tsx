@@ -19,6 +19,8 @@ interface SidebarProps {
 export default function Sidebar({ onLogout, isOpen = false, onClose, user }: SidebarProps) {
   const isAdmin = user?.role === 'admin';
   const [location] = useLocation();
+  
+
 
   return (
     <>
