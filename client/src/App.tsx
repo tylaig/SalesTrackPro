@@ -16,13 +16,23 @@ import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/navigation/Sidebar";
 
 function Router({ isAuthenticated, onLogout, onLogin }: { isAuthenticated: boolean; onLogout: () => void; onLogin: (success: boolean) => void }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   if (!isAuthenticated) {
     return <Login onLogin={onLogin} />;
   }
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar onLogout={onLogout} />
+      {/* Toggle Button SEMPRE VISÍVEL em mobile */}
+      <button
+        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-lg border border-gray-300 rounded-md p-2 hover:bg-gray-50"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+      </button>
+
+      <Sidebar onLogout={onLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="flex-1 w-full min-h-screen">
         <Switch>
           <Route path="/" component={Dashboard} />

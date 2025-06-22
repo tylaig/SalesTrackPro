@@ -6,25 +6,17 @@ import { UserCircle, LogOut } from "lucide-react";
 
 interface SidebarProps {
   onLogout?: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ onLogout }: SidebarProps) {
+export default function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
   const [location] = useLocation();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
     <>
-      {/* Mobile toggle button - SEMPRE VISÍVEL */}
-      <button
-        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-lg border border-gray-300 rounded-md p-2 hover:bg-gray-50"
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        type="button"
-      >
-        {isMobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-      </button>
-
       {/* Sidebar */}
-      <aside className={`${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 w-64 bg-white shadow-lg h-screen fixed md:sticky md:top-0 z-40 overflow-y-auto transition-transform duration-300 ease-in-out`}>
+      <aside className={`${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 w-64 bg-white shadow-lg h-screen fixed md:sticky md:top-0 z-40 overflow-y-auto transition-transform duration-300 ease-in-out`}>
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-800 flex items-center">
             <TrendingUp className="text-primary mr-2 h-6 w-6" />
@@ -142,10 +134,10 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       </aside>
       
       {/* Overlay for mobile */}
-      {isMobileOpen && (
+      {isOpen && onClose && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={() => setIsMobileOpen(false)}
+          onClick={onClose}
         />
       )}
     </>
