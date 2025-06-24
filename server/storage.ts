@@ -613,11 +613,10 @@ export class DatabaseStorage implements IStorage {
             // Update most recent pending sale to recovered (PIX was generated, then approved)
             const pendingSale = pendingSales[0];
             await db.update(sales)
-              .set({ 
-                status: 'recovered', 
-                eventType: event, 
-                saleId: sale_id,
-                updatedAt: new Date()
+              .set({
+                status: 'recovered',
+                eventType: event,
+                saleId: sale_id
               })
               .where(eq(sales.id, pendingSale.id));
             message = 'Venda recuperada com sucesso - PIX gerado e depois aprovado';
@@ -625,11 +624,10 @@ export class DatabaseStorage implements IStorage {
             // Update most recent lost sale to recovered
             const lostSale = lostSales[0];
             await db.update(sales)
-              .set({ 
-                status: 'recovered', 
-                eventType: event, 
-                saleId: sale_id,
-                updatedAt: new Date()
+              .set({
+                status: 'recovered',
+                eventType: event,
+                saleId: sale_id
               })
               .where(eq(sales.id, lostSale.id));
             message = 'Venda recuperada com sucesso - carrinho abandonado recuperado';
@@ -761,7 +759,7 @@ export class DatabaseStorage implements IStorage {
             // If client had previous abandonment, mark this sale as recovered
             if (hadPreviousAbandonment) {
               await db.update(sales)
-                .set({ status: 'recovered', updatedAt: new Date() })
+                .set({ status: 'recovered' })
                 .where(eq(sales.id, sale.id));
               
               fixedCount++;
