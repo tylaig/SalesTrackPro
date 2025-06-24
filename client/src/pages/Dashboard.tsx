@@ -82,6 +82,8 @@ export default function Dashboard() {
           <KPICards metrics={{
             totalSales: metrics.totalSales || 0,
             recoveredSales: metrics.recoveredSales || 0,
+            recoveredPix: metrics.recoveredPix || 0,
+            recoveredCart: metrics.recoveredCart || 0,
             lostSales: metrics.lostSales || 0,
             totalClients: metrics.totalClients || 0,
             salesGrowth: metrics.salesGrowth || 0,

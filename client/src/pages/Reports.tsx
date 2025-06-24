@@ -59,6 +59,7 @@ export default function Reports() {
             <div class="kpi-item">
               <h3>Vendas Recuperadas</h3>
               <p>R$ ${metrics?.recoveredSales?.toLocaleString('pt-BR') || '0,00'}</p>
+              <p style="font-size:12px">PIX: R$ ${metrics?.recoveredPix?.toLocaleString('pt-BR') || '0,00'} | Carrinho: R$ ${metrics?.recoveredCart?.toLocaleString('pt-BR') || '0,00'}</p>
             </div>
             <div class="kpi-item">
               <h3>Vendas Perdidas</h3>
@@ -167,6 +168,8 @@ export default function Reports() {
         <KPICards metrics={{
           totalSales: metrics.totalSales,
           recoveredSales: metrics.recoveredSales,
+          recoveredPix: metrics.recoveredPix,
+          recoveredCart: metrics.recoveredCart,
           lostSales: metrics.lostSales,
           totalClients: metrics.totalClients,
           salesGrowth: 15.2,

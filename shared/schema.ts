@@ -33,6 +33,7 @@ export const sales = pgTable("sales", {
   status: varchar("status", { length: 50 }).notNull(), // pending, realized, recovered, lost
   paymentMethod: varchar("payment_method", { length: 100 }),
   eventType: varchar("event_type", { length: 50 }), // PIX_GENERATED, SALE_APPROVED, ABANDONED_CART
+  recoverySource: varchar("recovery_source", { length: 20 }), // 'pix' | 'cart'
   utmCampaign: text("utm_campaign"),
   utmMedium: text("utm_medium"),
   utmContent: text("utm_content"),
@@ -90,6 +91,8 @@ export const insertClientSchema = createInsertSchema(clients).omit({
 export const insertSaleSchema = createInsertSchema(sales).omit({
   id: true,
   date: true,
+}).extend({
+  recoverySource: z.string().optional(),
 });
 
 export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
@@ -109,6 +112,7 @@ export type InsertSale = z.infer<typeof insertSaleSchema>;
 export type Sale = typeof sales.$inferSelect & {
   saleId?: string | null;
   eventType?: string | null;
+  recoverySource?: string | null;
   utmCampaign?: string | null;
   utmMedium?: string | null;
   utmContent?: string | null;

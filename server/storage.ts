@@ -32,6 +32,8 @@ export interface IStorage {
   getSalesMetrics(): Promise<{
     totalSales: number;
     recoveredSales: number;
+    recoveredPix: number;
+    recoveredCart: number;
     lostSales: number;
     totalClients: number;
   }>;
@@ -227,6 +229,14 @@ export class DatabaseStorage implements IStorage {
       const recoveredSalesValue = allSales
         .filter(sale => sale.status === 'recovered')
         .reduce((sum, sale) => sum + Number(sale.value), 0);
+
+      const recoveredPixValue = allSales
+        .filter(sale => sale.status === 'recovered' && sale.recoverySource === 'pix')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
+
+      const recoveredCartValue = allSales
+        .filter(sale => sale.status === 'recovered' && sale.recoverySource === 'cart')
+        .reduce((sum, sale) => sum + Number(sale.value), 0);
         
       const lostSalesValue = allSales
         .filter(sale => sale.status === 'lost')
@@ -313,6 +323,8 @@ export class DatabaseStorage implements IStorage {
       return {
         totalSales: totalSalesValue,
         recoveredSales: recoveredSalesValue,
+        recoveredPix: recoveredPixValue,
+        recoveredCart: recoveredCartValue,
         lostSales: lostSalesValue,
         totalClients: allClients.length,
         salesGrowth: Math.round(salesGrowth * 10) / 10, // Round to 1 decimal
@@ -613,10 +625,11 @@ export class DatabaseStorage implements IStorage {
             // Update most recent pending sale to recovered (PIX was generated, then approved)
             const pendingSale = pendingSales[0];
             await db.update(sales)
-              .set({ 
-                status: 'recovered', 
-                eventType: event, 
+              .set({
+                status: 'recovered',
+                eventType: event,
                 saleId: sale_id,
+                recoverySource: 'pix',
                 updatedAt: new Date()
               })
               .where(eq(sales.id, pendingSale.id));
@@ -625,10 +638,11 @@ export class DatabaseStorage implements IStorage {
             // Update most recent lost sale to recovered
             const lostSale = lostSales[0];
             await db.update(sales)
-              .set({ 
-                status: 'recovered', 
-                eventType: event, 
+              .set({
+                status: 'recovered',
+                eventType: event,
                 saleId: sale_id,
+                recoverySource: 'cart',
                 updatedAt: new Date()
               })
               .where(eq(sales.id, lostSale.id));
@@ -746,22 +760,28 @@ export class DatabaseStorage implements IStorage {
           if (sale.status === 'realized' && sale.eventType === 'SALE_APPROVED') {
             // Look for any previous abandonment events for this client
             let hadPreviousAbandonment = false;
+            let recoverySource: 'pix' | 'cart' | null = null;
             
             for (let j = 0; j < i; j++) {
               const previousSale = clientSales[j];
-              if (previousSale.status === 'lost' || 
-                  (previousSale.status === 'pending' && previousSale.eventType === 'PIX_GENERATED') ||
-                  previousSale.eventType === 'ABANDONED_CART') {
+              if (previousSale.status === 'lost' || previousSale.eventType === 'ABANDONED_CART') {
                 hadPreviousAbandonment = true;
+                recoverySource = 'cart';
+                console.log(`Found previous abandonment: Sale ${previousSale.id} (${previousSale.eventType})`);
+                break;
+              }
+              if (previousSale.status === 'pending' && previousSale.eventType === 'PIX_GENERATED') {
+                hadPreviousAbandonment = true;
+                recoverySource = 'pix';
                 console.log(`Found previous abandonment: Sale ${previousSale.id} (${previousSale.eventType})`);
                 break;
               }
             }
-            
+
             // If client had previous abandonment, mark this sale as recovered
             if (hadPreviousAbandonment) {
               await db.update(sales)
-                .set({ status: 'recovered', updatedAt: new Date() })
+                .set({ status: 'recovered', recoverySource, updatedAt: new Date() })
                 .where(eq(sales.id, sale.id));
               
               fixedCount++;

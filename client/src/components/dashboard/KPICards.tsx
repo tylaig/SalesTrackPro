@@ -5,6 +5,8 @@ interface KPICardsProps {
   metrics: {
     totalSales: number;
     recoveredSales: number;
+    recoveredPix: number;
+    recoveredCart: number;
     lostSales: number;
     totalClients: number;
     salesGrowth: number;
@@ -44,6 +46,7 @@ export default function KPICards({ metrics }: KPICardsProps) {
     {
       title: "Vendas Recuperadas",
       value: formatCurrency(metrics.recoveredSales),
+      subValue: `PIX: ${formatCurrency(metrics.recoveredPix)} | Carrinho: ${formatCurrency(metrics.recoveredCart)}`,
       growth: formatPercent(metrics.recoveryGrowth),
       growthText: "vs mês anterior",
       icon: RotateCcw,
@@ -82,6 +85,9 @@ export default function KPICards({ metrics }: KPICardsProps) {
               <div>
                 <p className="text-sm text-gray-600 mb-1">{card.title}</p>
                 <p className="text-2xl font-semibold text-gray-800">{card.value}</p>
+                {card.subValue && (
+                  <p className="text-xs text-gray-500">{card.subValue}</p>
+                )}
                 <div className="flex items-center mt-2">
                   <span className={`text-xs font-medium ${card.growthColor}`}>
                     {card.growth}
