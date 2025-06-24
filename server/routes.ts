@@ -422,70 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Old webhook completely removed to avoid conflicts
 
-  // WhatsApp chips management
-  app.get("/api/admin/whatsapp-chips", async (req, res) => {
-    try {
-      const chips = await storage.getWhatsappChips();
-      res.json(chips);
-    } catch (error) {
-      console.error("Error fetching whatsapp chips:", error);
-      res.status(500).json({ message: "Failed to fetch whatsapp chips" });
-    }
-  });
 
-  app.post("/api/admin/whatsapp-chips", async (req, res) => {
-    try {
-      const result = insertWhatsappChipSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid whatsapp chip data" });
-      }
-
-      const chip = await storage.createWhatsappChip(result.data);
-      res.status(201).json(chip);
-    } catch (error) {
-      console.error("Error creating whatsapp chip:", error);
-      res.status(500).json({ message: "Failed to create whatsapp chip" });
-    }
-  });
-
-  app.patch("/api/admin/whatsapp-chips/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const chip = await storage.updateWhatsappChip(id, req.body);
-      if (!chip) {
-        return res.status(404).json({ message: "WhatsApp chip not found" });
-      }
-      res.json(chip);
-    } catch (error) {
-      console.error("Error updating whatsapp chip:", error);
-      res.status(500).json({ message: "Failed to update whatsapp chip" });
-    }
-  });
-
-  app.delete("/api/admin/whatsapp-chips/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const success = await storage.deleteWhatsappChip(id);
-      if (!success) {
-        return res.status(404).json({ message: "WhatsApp chip not found" });
-      }
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting whatsapp chip:", error);
-      res.status(500).json({ message: "Failed to delete whatsapp chip" });
-    }
-  });
-
-  app.post("/api/admin/whatsapp-chips/:id/recover", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const success = await storage.recoverWhatsappChip(id);
-      res.json({ success });
-    } catch (error) {
-      console.error("Error recovering whatsapp chip:", error);
-      res.status(500).json({ message: "Failed to recover whatsapp chip" });
-    }
-  });
 
   // User plans management
   app.get("/api/admin/user-plans", async (req, res) => {
@@ -813,38 +750,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Fix existing recoveries
-  app.post("/api/admin/fix-recoveries", requireAdmin, async (req, res) => {
-    try {
-      const result = await storage.fixExistingRecoveries();
-      res.json(result);
-    } catch (error) {
-      console.error("Error fixing recoveries:", error);
-      res.status(500).json({ message: "Failed to fix recoveries" });
-    }
-  });
-
-  // Data clearing endpoints
-  app.post("/api/admin/clear-sales", requireAdmin, async (req, res) => {
-    try {
-      await storage.clearAllSales();
-      res.json({ message: "Todas as vendas foram removidas" });
-    } catch (error) {
-      console.error("Error clearing sales:", error);
-      res.status(500).json({ message: "Failed to clear sales" });
-    }
-  });
-
-  app.post("/api/admin/clear-clients", requireAdmin, async (req, res) => {
-    try {
-      await storage.clearAllClients();
-      res.json({ message: "Todos os clientes foram removidos" });
-    } catch (error) {
-      console.error("Error clearing clients:", error);
-      res.status(500).json({ message: "Failed to clear clients" });
-    }
-  });
-
   app.post("/api/admin/whatsapp-chips/:id/recover", async (req, res) => {
     try {
       const chipId = parseInt(req.params.id);
@@ -858,6 +763,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to recover WhatsApp chip" });
     }
   });
+
+  // Fix existing recoveries
+  app.post("/api/admin/fix-recoveries", requireAdmin, async (req, res) => {
+    try {
+      const result = await storage.fixExistingRecoveries();
+      res.json(result);
+    } catch (error) {
+      console.error("Error fixing recoveries:", error);
+      res.status(500).json({ message: "Failed to fix recoveries" });
+    }
+  });
+
 
   // Admin metrics
   app.get("/api/admin/metrics", async (req, res) => {
